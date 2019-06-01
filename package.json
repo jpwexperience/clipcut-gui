@@ -1,0 +1,26 @@
+{
+  "name": "bashelectro",
+  "version": "1.0.0",
+  "description": "Bash and Javascript",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/darumswizel/bashelectro.git"
+  },
+  "author": "John Williams",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/darumswizel/bashelectro/issues"
+  },
+  "homepage": "https://github.com/darumswizel/bashelectro#readme",
+  "devDependencies": {
+    "electron": "^5.0.2"
+  },
+  "dependencies": {
+    "ffmpeg-static": "^2.4.0",
+    "jquery": "^3.4.1"
+  }
+}
