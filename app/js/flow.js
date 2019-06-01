@@ -1,23 +1,30 @@
 const path = require('path');
+const fs = require('fs');
 var ffmpeg = require('ffmpeg-static');
+var ffpath = ffmpeg.path;
+var filePaths = [];
+var films = [];
+
+class Stream {
+	constructor(streams, meta){
+		this.streams = streams;
+		this.meta = meta;
+	}
+}
+
+class Film {
+        constructor(filepath, video, audio, subtitle, extSubs) {
+                this.filepath = filepath;
+                this.video = video;
+                this.audio = audio;
+                this.subtitle = subtitle;
+		this.extSubs = extSubs;
+        }
+}
 
 function appendTxt(className, txt){
 	$(document).ready(function () {
 		$("." + className).append(txt);
-	});
-}
-
-function runCmd(command) {
-	var exec = require('child_process').exec, child;
-	child = exec(command,
-	function (error, stdout, stderr) {
-		console.log('stdout: ' + stdout);
-		appendTxt("main", '<br><p class="test">Stdout:<br>' + stdout + '</p>');	
-		console.log('stderr: ' + stderr);
-		appendTxt("main", '<br><p class="test">Stderr:<br>' + stderr + '</p>');	
-		if (error !== null) {
-		console.log('exec error: ' + error);
-		}
 	});
 }
 
@@ -26,12 +33,65 @@ function clearHtml(elemId) {
         $("." + elemId).html("");
 }
 
-function ffprobe(filePath) {
-	runCmd('ffprobe -i "' + filePath + '"');
-
+function streamProcess(results, filepath) {
+	//appendTxt("main", results);
+	var streams = [];
+	var vStreams = [];
+	var aStreams = [];
+	var sStreams = [];
+	var extSubs = [];
+	var streamReg = /.*Stream #.*/;
+	var vReg = /.*Video:.*/;
+	var aReg = /.*Audio:.*/;
+	var sReg = /.*Subtitle:.*/;
+	var lines = results.split("\n");
+	for (var i = 0; i < lines.length; i++){
+		//appendTxt("main", lines[i] + "<br>");
+		if (streamReg.test(lines[i])){
+			streams.push(lines[i]);
+		}
+	}
+	for (var i = 0; i < streams.length; i++){
+		//appendTxt("main", streams[i] + "<br>");
+		if (vReg.test(streams[i])){
+			vStreams.push(streams[i]);
+		} else if (aReg.test(streams[i])){
+			aStreams.push(streams[i]);
+		} else if (sReg.test(streams[i])){
+			sStreams.push(streams[i]);
+		} else {;}
+	}
+	var dirpath = path.dirname(filepath);
+	var files = fs.readdirSync(dirpath);
+	for (i = 0; i < files.length; i++){
+                var ext = files[i].split('.').pop();
+                if (ext === "srt" || ext === "ass"){
+                        var extSub = dirpath + "/" + files[i];
+                        extSubs.push(extSub);
+                }
+        }
+	console.log("Video Streams: " + vStreams);
+	console.log("Audio Streams: " + aStreams);
+	console.log("Subtitle Streams: " + sStreams);
+	console.log("External Subtitles: " + extSubs);
+	var newFilm = new Film(filepath, vStreams, aStreams, sStreams, extSubs)
+	films.push(newFilm);
 }
 
-var filePaths = [];
+function ffprobe(filepath) {
+	var command = ffpath + ' -hide_banner -i "' + filepath + '"';
+	var exec = require('child_process').exec, child;
+	child = exec(command,
+	function (error, stdout, stderr) {
+		if (error !== null) {
+			console.log('exec error: ' + error);
+		}
+		console.log('stdout: ' + stdout);
+		console.log('stderr: ' + stderr);
+		streamProcess(stderr, filepath);
+	});
+}
+
 //Processes input files from button
 function fileUp() {
         filePaths = [];
@@ -66,7 +126,7 @@ function fileUp() {
                         txt  += "<br>The path of the selected file: " + x.value;                }
         }
 	appendTxt("clipForm", txt);
-	for (i = 0; i < filePaths.length; i++){
+	for (var i = 0; i < filePaths.length; i++){
 		var tempPath = filePaths[i];
 		ffprobe(tempPath);
         }
