@@ -1,15 +1,25 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8">
-    <script>
-            window.$ = window.jQuery = require("jquery");
-    </script>
-    <script src="app/js/flow.js"></script>
-    <link rel="stylesheet" type="text/css" href="app/css/main.css">
-    <title>BashElectron</title>
-  </head>
-  <body>
-	  <div class="main"></div>
-  </body>
+	<head>
+		<meta charset="UTF-8">
+		<script>
+		window.$ = window.jQuery = require("jquery");
+		</script>
+		<script src="app/js/flow.js"></script>
+		<link rel="stylesheet" type="text/css" href="app/css/main.css">
+		<title>BashElectron</title>
+	</head>
+	<body>
+		<div class="main"></div>
+		<div class="row">
+			<div class="column">
+				<input class="inFiles" type="File" id="upFile" multiple size="50" onchange="fileUp()">
+				<div class="clipForm"></div>
+			</div>
+			<div class="column">
+				<h3 class="title">Clip Queue</h3>
+				<div class="clipQueue"></div>
+			</div>
+		</div>
+	</body>
 </html>
