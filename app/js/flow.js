@@ -26,9 +26,14 @@ function clearHtml(elemId) {
         $("." + elemId).html("");
 }
 
-filePaths = [];
+function ffprobe(filePath) {
+	runCmd('ffprobe -i "' + filePath + '"');
+
+}
+
+var filePaths = [];
 //Processes input files from button
-function fileUp(){
+function fileUp() {
         filePaths = [];
         //clear screen when new files are presented
         clearHtml("main");
@@ -62,10 +67,11 @@ function fileUp(){
         }
 	appendTxt("clipForm", txt);
 	for (i = 0; i < filePaths.length; i++){
-		tempPath = filePaths[i];
-                runCmd('./app/bash/streaminfo.sh ' + '"' + tempPath + '"');
+		var tempPath = filePaths[i];
+		ffprobe(tempPath);
         }
 }
 
 appendTxt("main", "ffmpeg static path: " + ffmpeg.path);
+
 
