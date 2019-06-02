@@ -25,6 +25,20 @@ class Film {
         }
 }
 
+class Clip {
+	constructor(id, vChoice, aChoice, sChoice, start, dur, crf, ext, name) {
+		this.id = id;
+		this.vChoice = vChoice;
+		this.aChoice = aChoice;
+		this.sChoice = aChoice;
+		this.start = start;
+		this.dur = dur;
+		this.crf = crf;
+		this.ext = ext;
+		this.name = name;
+	}
+}
+
 function appendTxt(name, txt){
 	$(document).ready(function () {
 		$(name).append(txt);
@@ -39,6 +53,21 @@ function radioCheck(name, val){
 //Clears the html within an element
 function clearHtml(elemId) {
         $(elemId).html("");
+}
+
+function formProcess(id){
+	console.log("Form ID: " + id);
+	var vChoice = $("input[name=vStreams-" + id + "]:checked").val();
+	var aChoice = $("input[name=aStreams-" + id + "]:checked").val();
+	var sChoice = $("input[name=aStreams-" + id + "]:checked").val();
+	var start = $("startBox-" + id).val;
+	var dur = $("durBox-" + id).val;
+	var crf = $("crfBox-" + id).val;
+	var extension = $("input[name=ext-" + id + "]:checked").val();
+	var clipName = $("nameBox-" + id).val(); 
+	var tempClip = new Clip(clipCount, vChoice, aChoice, sChoice, start, dur, crf, extension, clipName);
+	console.log("Clip Count: " + clipCount);
+	clipCount++;
 }
 
 function filmForm(film){
@@ -86,12 +115,12 @@ function filmForm(film){
 	if (film.subtitle.length + film.extSubs.length == 0){
 		appendTxt("#form-" + id, "<b>No Subtitles Available</b><br>");
 		appendTxt("#form-" + id, '<input type="radio" name="sStreams-' + id + '" ' + 
-		'id="aStreams-nosub-"' + id + '" value="-1">No Subtitles<br>');
+		'id="aStreams-nosub-"' + id + '" value="-1"> No Subtitles<br>');
 		radioCheck("#aStreams-nosub-" + id, true);
 	} else{
 		appendTxt("#form-" + id, "<b>Subtitle Streams</b><br>");
 		appendTxt("#form-" + id, '<input type="radio" name="sStreams-' + id + '" ' + 
-		'id="sStreams-' + i + '-' + id + '" value="-1">No Subtitles<br>');
+		'id="sStreams-' + i + '-' + id + '" value="-1"> No Subtitles<br>');
 		radioCheck("#sStreams-" + i + "-" + id, true);
 		for (var i = 0; i < film.subtitle.length + film.extSubs.length; i++){
 			if (i < film.subtitle.length){
@@ -108,15 +137,29 @@ function filmForm(film){
 	appendTxt("#form-" + id, "<br>");
 
 	//start time
-	appendTxt("#form-" + id, '<div class="formRow" id="start-' + id + '"></div>');
-	appendTxt("#start-" + id, '<div class="formColumn" id="startCol-' + id + '"></div>');
+	appendTxt("#form-" + id, '<div class="formRow" id="startRow-' + id + '"></div>');
+	appendTxt("#startRow-" + id, '<div class="formColumn" id="startCol-' + id + '"></div>');
+	appendTxt("#startCol-" + id, "<b>Clip Start</b>");
+	appendTxt("#startRow-" + id, '<div class="formColumn" id="startColEntry-' + id + '"></div>');
+	appendTxt("#startColEntry-" + id, '<input type="text" class="textBox" id="startBox-' + id + '" placeholder="00:00:00.00">');
+	appendTxt("#form-" + id, "<br>");
 	
 	//duration
-	appendTxt("#form-" + id, '<div class="formRow" id="dur-' + id + '">></div>');
+	appendTxt("#form-" + id, '<div class="formRow" id="durRow-' + id + '"></div>');
+	appendTxt("#durRow-" + id, '<div class="formColumn" id="durCol-' + id + '"></div>');
+	appendTxt("#durCol-" + id, "<b>Clip Duration</b>");
+	appendTxt("#durRow-" + id, '<div class="formColumn" id="durColEntry-' + id + '"></div>');
+	appendTxt("#durColEntry-" + id, '<input type="text" class="textBox" id="durBox-' + id + '" placeholder="1:00">');
+	appendTxt("#form-" + id, "<br>");
 	
 
 	//crf value
-	appendTxt("#form-" + id, '<div class="formRow" id="crf-' + id + '">></div>');
+	appendTxt("#form-" + id, '<div class="formRow" id="crfRow-' + id + '"></div>');
+	appendTxt("#crfRow-" + id, '<div class="formColumn" id="crfCol-' + id + '"></div>');
+	appendTxt("#crfCol-" + id, "<b>Quality Level</b>");
+	appendTxt("#crfRow-" + id, '<div class="formColumn" id="crfColEntry-' + id + '"></div>');
+	appendTxt("#crfColEntry-" + id, '<input type="text" class="textBox" id="crfBox-' + id + '" placeholder="18-32">');
+	appendTxt("#form-" + id, "<br>");
 	
 
 	//scale
@@ -126,10 +169,26 @@ function filmForm(film){
 	
 
 	//clip name
-	
+	appendTxt("#form-" + id, "<b>Enter Clip Name:</b>");
+	appendTxt("#form-" + id, "<br>");
+	var nameHolder = path.basename(film.filepath).replace(/\.[^/.]+$/, "") + "-cut";
+	appendTxt("#form-" + id, '<input type="text" id="nameBox-"' + id + '" placeholder="' + nameHolder + '" class="clipTextBox">');
+	appendTxt("#form-" + id, "<br>");
+	appendTxt("#form-" + id, "<br>");
+
+	//extension choice
+	appendTxt("#form-" + id, '<input type="radio" id="ext-' + id + '" name="ext-' + id + '" value="mp4"> .mp4');
+	radioCheck("#ext-" + id, true);
+	appendTxt("#form-" + id, "<br>");
+	appendTxt("#form-" + id, '<input type="radio" name="ext-' + id + '" value="mov"> .mov');
+	appendTxt("#form-" + id, "<br>");
+	appendTxt("#form-" + id, '<input type="radio" name="ext-' + id + '" value="mkv"> .mkv');
+	appendTxt("#form-" + id, "<br>");
+	appendTxt("#form-" + id, "<br>");
 
 	//submit button
-
+	appendTxt("#form-" + id, '<button id="submit-' + id + '" type="button" class="button" ' + 
+	'onclick="formProcess(' + id +')">Add Clip to Queue</button>');
 }
 
 function streamProcess(results, filepath) {
