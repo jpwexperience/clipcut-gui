@@ -4,6 +4,7 @@ var ffmpeg = require('ffmpeg-static');
 var ffpath = ffmpeg.path;
 var filePaths = [];
 var films = [];
+var clips = [];
 var filmCount = 0;
 var clipCount = 0;
 
@@ -26,16 +27,9 @@ class Film {
 }
 
 class Clip {
-	constructor(id, vChoice, aChoice, sChoice, start, dur, crf, ext, name) {
+	constructor(id, command) {
 		this.id = id;
-		this.vChoice = vChoice;
-		this.aChoice = aChoice;
-		this.sChoice = aChoice;
-		this.start = start;
-		this.dur = dur;
-		this.crf = crf;
-		this.ext = ext;
-		this.name = name;
+		this.command= command;
 	}
 }
 
@@ -55,18 +49,110 @@ function clearHtml(elemId) {
         $(elemId).html("");
 }
 
-function formProcess(id){
+function ffCommand(filmId, vChoice, aChoice, sChoice, start, dur, crf, extension, clipName) {
+	var workingFilm;
+	for (var i = 0; i < films.length; i++){
+		if (films[i].id == filmId){
+			workingFilm = films[i];
+		}
+	}
+	console.log("vChoice: " + vChoice + " aChoice: " + aChoice + " sChoice: " + sChoice);
+	var clipPath = path.dirname(workingFilm.filepath) + '/' + clipName + '.' + extension;
+	var outPath = '"' + clipPath + '"';
+	var command = ffpath + ' -y -hide_banner';
+	var ffStart = '-ss ' + start;
+	var ffIn = '-i "' + workingFilm.filepath + '"';
+	var ffDur = '-t ' + dur;
+	var ffCrf = '-crf ' + crf;
+	var ffOut = '"' + clipPath + '"';
+	var ffVmap = '-map 0:v:' + vChoice;
+	var ffAmap = '-map 0:a:' + aChoice;
+	var ffCv = '-c:v libx264';
+	var ffCa = '-c:a aac';
+	var ffCompMap = '-map "[v]"';
+	var subtitleCmd = '';
+	var fastSubReg = /.*(pgs|PGS|dvd_subtitle).*/;
+	var fastSub = 0;
+	//var ffCrop
+	//var ffScale
+	//var ffCropScale
+	
+	//Check for subtitles
+	if (sChoice >= 0){
+		if (sChoice >= workingFilm.subtitle.length){
+			var extSubInd = sChoice - workingFilm.subtitle.length;	
+			var extSubPath = workingFilm.extSubs[extSubInd];
+			subtitleCmd += '-vf "subtitles=' + extSubPath + '"';	
+		} else {
+			if (fastSubReg.test(workingFilm.subtitle[sChoice])){
+				subtitleCmd += '-filter_complex "[0:v:' + vChoice + 
+				'][0:s:' + sChoice + ']overlay[v]" ' + ffCompMap;	
+				fastSub = 1;
+			} else{
+				subtitleCmd += '-vf "subtitles=' + workingFilm.filepath + ':si=' + sChoice + '"';	
+			}
+		}
+	}
+
+	if (sChoice >= 0){
+		if (fastSub == 1){
+			if (aChoice == -1){
+				command += ' ' + ffStart + ' ' + ffIn + ' ' + ffDur + ' ' + subtitleCmd + 
+				' ' + ffCv + ' -an ' + ffCrf + ' ' + outPath;	
+			} else{
+				command += ' ' + ffStart + ' ' + ffIn + ' ' + ffDur + ' ' + subtitleCmd + 
+				' ' + ffAmap + ' ' + ffCv + ' ' + ffCa + ' ' + ffCrf + ' ' + outPath;	
+			}
+		} else{
+			if (achoice == -1){
+				command += ' ' + ffIn + ' ' + ffStart + ' ' + ffDur + ' ' + ffVmap + ' ' + subtitleCmd + 
+				' ' + ffCv + ' -an ' + ffCrf + ' ' + outPath;
+			} else{
+				command += ' ' + ffIn + ' ' + ffStart + ' ' + ffDur + ' ' + ffVmap + ' ' + subtitleCmd + 
+				' ' + ffAmap + ' ' + ffCv + ' ' + ffCa + ' ' + ffCrf + ' ' + outPath;
+			}
+		}
+	} else {
+		if (aChoice == -1){
+			command += ' ' + ffStart + ' ' + ffIn + ' ' + ffDur + ' ' + ffVmap + ' ' + 
+			ffCv + ' -an ' + ffCrf + ' ' + outPath; 
+		} else{
+			command += ' ' + ffStart + ' ' + ffIn + ' ' + ffDur + ' ' + ffVmap + ' ' + 
+			ffAmap + ' ' + ffCv + ' ' + ffCa + ' ' + ffCrf + ' ' + outPath; 
+		}
+	} 
+	return command;
+}
+
+//elem: some object
+//if object is null, return val
+//return the object otherwise
+function emptyCheck(elem, val) {
+        if (elem){
+                return elem
+        }
+        else {
+                return val
+        }
+}
+
+function formProcess(id, emptyName){
 	console.log("Form ID: " + id);
+	
 	var vChoice = $("input[name=vStreams-" + id + "]:checked").val();
 	var aChoice = $("input[name=aStreams-" + id + "]:checked").val();
-	var sChoice = $("input[name=aStreams-" + id + "]:checked").val();
-	var start = $("startBox-" + id).val;
-	var dur = $("durBox-" + id).val;
-	var crf = $("crfBox-" + id).val;
+	var sChoice = $("input[name=sStreams-" + id + "]:checked").val();
 	var extension = $("input[name=ext-" + id + "]:checked").val();
-	var clipName = $("nameBox-" + id).val(); 
-	var tempClip = new Clip(clipCount, vChoice, aChoice, sChoice, start, dur, crf, extension, clipName);
-	console.log("Clip Count: " + clipCount);
+
+	var start = emptyCheck($("#startBox-" + id).val(), "0");
+	var dur = emptyCheck($("#durBox-" + id).val(), "1:00");
+	var crf = emptyCheck($("#crfBox-" + id).val(), 18);
+	var clipName = emptyCheck($("#nameBox-" + id).val(), emptyName); 
+	
+	var newCommand = ffCommand(id, vChoice, aChoice, sChoice, start, dur, crf, extension, clipName);
+	var tempClip = new Clip(clipCount, newCommand);
+	console.log("FFmpeg Command: " + newCommand);
+	clips.push(tempClip);
 	clipCount++;
 }
 
@@ -115,17 +201,17 @@ function filmForm(film){
 	if (film.subtitle.length + film.extSubs.length == 0){
 		appendTxt("#form-" + id, "<b>No Subtitles Available</b><br>");
 		appendTxt("#form-" + id, '<input type="radio" name="sStreams-' + id + '" ' + 
-		'id="aStreams-nosub-"' + id + '" value="-1"> No Subtitles<br>');
-		radioCheck("#aStreams-nosub-" + id, true);
+		'id="sStreams-nosub-"' + id + '" value="-1"> No Subtitles<br>');
+		radioCheck("#sStreams-nosub-" + id, true);
 	} else{
 		appendTxt("#form-" + id, "<b>Subtitle Streams</b><br>");
 		appendTxt("#form-" + id, '<input type="radio" name="sStreams-' + id + '" ' + 
-		'id="sStreams-' + i + '-' + id + '" value="-1"> No Subtitles<br>');
-		radioCheck("#sStreams-" + i + "-" + id, true);
+		'id="sStreams-nosub-' + id + '" value="-1"> No Subtitles<br>');
+		radioCheck("#sStreams-nosub-" + id, true);
 		for (var i = 0; i < film.subtitle.length + film.extSubs.length; i++){
 			if (i < film.subtitle.length){
-				appendTxt("#form-" + id, '<input type="radio" name="aStreams-' + id + '" ' + 
-				'id="aStreams-' + i + '-' + id + '" value="' + i + '">' + film.subtitle[i] + '<br>');
+				appendTxt("#form-" + id, '<input type="radio" name="sStreams-' + id + '" ' + 
+				'id="sStreams-' + i + '-' + id + '" value="' + i + '">' + film.subtitle[i] + '<br>');
 			} else{
 				var extInd = i - film.subtitle.length;
 				appendTxt("#form-" + id, '<input type="radio" name="sStreams-' + id + '" ' + 
@@ -141,7 +227,9 @@ function filmForm(film){
 	appendTxt("#startRow-" + id, '<div class="formColumn" id="startCol-' + id + '"></div>');
 	appendTxt("#startCol-" + id, "<b>Clip Start</b>");
 	appendTxt("#startRow-" + id, '<div class="formColumn" id="startColEntry-' + id + '"></div>');
-	appendTxt("#startColEntry-" + id, '<input type="text" class="textBox" id="startBox-' + id + '" placeholder="00:00:00.00">');
+	appendTxt("#startColEntry-" + id, '<input type="text" class="textBox" id="startBox-' + 
+	id + '" placeholder="00:00:00.00">');
+	
 	appendTxt("#form-" + id, "<br>");
 	
 	//duration
@@ -172,7 +260,7 @@ function filmForm(film){
 	appendTxt("#form-" + id, "<b>Enter Clip Name:</b>");
 	appendTxt("#form-" + id, "<br>");
 	var nameHolder = path.basename(film.filepath).replace(/\.[^/.]+$/, "") + "-cut";
-	appendTxt("#form-" + id, '<input type="text" id="nameBox-"' + id + '" placeholder="' + nameHolder + '" class="clipTextBox">');
+	appendTxt("#form-" + id, '<input type="text" id="nameBox-' + id + '" placeholder="' + nameHolder + '" class="clipTextBox">');
 	appendTxt("#form-" + id, "<br>");
 	appendTxt("#form-" + id, "<br>");
 
@@ -188,7 +276,7 @@ function filmForm(film){
 
 	//submit button
 	appendTxt("#form-" + id, '<button id="submit-' + id + '" type="button" class="button" ' + 
-	'onclick="formProcess(' + id +')">Add Clip to Queue</button>');
+	'onclick="formProcess(' + id + ', \'' + nameHolder + '\')">Add Clip to Queue</button>');
 }
 
 function streamProcess(results, filepath) {
