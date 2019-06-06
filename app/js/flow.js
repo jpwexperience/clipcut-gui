@@ -173,10 +173,10 @@ function clipQueue(start, dur, crf, extension, clipName, clipCount, command){
 	appendTxt('#queueCol-0-' + clipCount, '<b>Start: ' + start + '</b><br>');
 	appendTxt('#queueCol-0-' + clipCount, '<b>Duration: ' + dur + '</b><br>');
 	appendTxt('#queueCol-0-' + clipCount, '<b>Quality Level: ' + crf + '</b><br>');
-	appendTxt('#queueCol-0-' + clipCount, '<b>FFmpeg Command: ' + command + '</b><br>');
+	//appendTxt('#queueCol-0-' + clipCount, '<b>FFmpeg Command: ' + command + '</b><br>');
 	appendTxt('#queueRow-' + clipCount, '<div class="queueCol" id="queueCol-1-' + clipCount + '">');
 
-	appendTxt('#queueCol-1-' + clipCount, '<div class="queueButtons" id="queueButtons-' + clipCount + '"></div>');
+	appendTxt('#clip-' + clipCount, '<div class="queueButtons" id="queueButtons-' + clipCount + '"></div>');
 	appendTxt('#queueButtons-' + clipCount, '<button class="queueButton" type="button" ' + 
 	'onclick="runCommand(' + clipCount + ')">Start Cutting Clip</button>');
 
