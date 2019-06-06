@@ -49,6 +49,44 @@ function clearHtml(elemId) {
         $(elemId).html("");
 }
 
+//Removes html within an element
+function removeClip(clipId, elemId) {
+	var clipIndex = -1;
+	for (var i = 0; i < clips.length; i++){
+		var tempClip = clips[i];
+		if (tempClip.id == clipId){
+			clipIndex = i;
+			break;
+		}
+	}
+        $("div").remove(elemId);
+	clips.splice(clipIndex, 1);
+}
+
+function runCommand(clipId){
+	var command = "";
+	for (var i = 0; i < clips.length; i++){
+		var tempClip = clips[i];
+		if (tempClip.id == clipId){
+			command = tempClip.command;
+			break;
+		}
+	}
+	console.log(command);
+	
+	var exec = require('child_process').exec, child;
+	child = exec(command,
+	function (error, stdout, stderr) {
+		if (error !== null) {
+			console.log('exec error: ' + error);
+		}
+		console.log('stdout: ' + stdout);
+		console.log('stderr: ' + stderr);
+		console.log("command done");
+	});
+	//I guess I can try putting the finish message here
+}
+
 function ffCommand(filmId, vChoice, aChoice, sChoice, start, dur, crf, extension, clipName) {
 	var workingFilm;
 	for (var i = 0; i < films.length; i++){
@@ -104,7 +142,7 @@ function ffCommand(filmId, vChoice, aChoice, sChoice, start, dur, crf, extension
 				' ' + ffAmap + ' ' + ffCv + ' ' + ffCa + ' ' + ffCrf + ' ' + outPath;	
 			}
 		} else{
-			if (achoice == -1){
+			if (aChoice == -1){
 				command += ' ' + ffIn + ' ' + ffStart + ' ' + ffDur + ' ' + ffVmap + ' ' + subtitleCmd + 
 				' ' + ffCv + ' -an ' + ffCrf + ' ' + outPath;
 			} else{
@@ -122,6 +160,31 @@ function ffCommand(filmId, vChoice, aChoice, sChoice, start, dur, crf, extension
 		}
 	} 
 	return command;
+}
+
+function clipQueue(start, dur, crf, extension, clipName, clipCount, command){
+	//console.log("clipQueue entered");
+
+	appendTxt('.clipQueue', '<div class="queueBox" id="clip-' + clipCount + '"></div>');
+
+	appendTxt('#clip-' + clipCount, '<div class="queueRow" id="queueRow-' + clipCount + '">');	
+	appendTxt('#queueRow-' + clipCount, '<div class="queueCol" id="queueCol-0-' + clipCount + '">');
+	appendTxt('#queueCol-0-' + clipCount, '<b>Clip Name: ' + clipName + '.' + extension + '</b><br>');
+	appendTxt('#queueCol-0-' + clipCount, '<b>Start: ' + start + '</b><br>');
+	appendTxt('#queueCol-0-' + clipCount, '<b>Duration: ' + dur + '</b><br>');
+	appendTxt('#queueCol-0-' + clipCount, '<b>Quality Level: ' + crf + '</b><br>');
+	appendTxt('#queueCol-0-' + clipCount, '<b>FFmpeg Command: ' + command + '</b><br>');
+	appendTxt('#queueRow-' + clipCount, '<div class="queueCol" id="queueCol-1-' + clipCount + '">');
+
+	appendTxt('#queueCol-1-' + clipCount, '<div class="queueButtons" id="queueButtons-' + clipCount + '"></div>');
+	appendTxt('#queueButtons-' + clipCount, '<button class="queueButton" type="button" ' + 
+	'onclick="runCommand(' + clipCount + ')">Start Cutting Clip</button>');
+
+	appendTxt("#queueButtons-" + clipCount, "<br><br>");
+
+	appendTxt('#queueButtons-' + clipCount, '<button class="queueButton" type="button" ' +
+	'onclick="removeClip(' + clipCount + ', \'#clip-' + clipCount + '\')">Remove from Queue</button>');
+
 }
 
 //elem: some object
@@ -150,8 +213,9 @@ function formProcess(id, emptyName){
 	var clipName = emptyCheck($("#nameBox-" + id).val(), emptyName); 
 	
 	var newCommand = ffCommand(id, vChoice, aChoice, sChoice, start, dur, crf, extension, clipName);
+	clipQueue(start, dur, crf, extension, clipName, clipCount, newCommand);
 	var tempClip = new Clip(clipCount, newCommand);
-	console.log("FFmpeg Command: " + newCommand);
+	//console.log("FFmpeg Command: " + newCommand);
 	clips.push(tempClip);
 	clipCount++;
 }
