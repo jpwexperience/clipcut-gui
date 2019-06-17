@@ -73,16 +73,20 @@ function runCommand(clipId){
 		}
 	}
 	console.log(command);
-	
+	appendTxt('#queueCol-1-' + clipId, '<b id="creation-' + clipId + '">Clip Creation has started. Be Patient.</b>');
+	//$('#queueCol-1-' + clipId).append("ayy lmao");
 	var exec = require('child_process').exec, child;
 	child = exec(command,
 	function (error, stdout, stderr) {
+		child.stderr.pipe(process.stderr);
 		if (error !== null) {
 			console.log('exec error: ' + error);
 		}
 		console.log('stdout: ' + stdout);
 		console.log('stderr: ' + stderr);
 		console.log("command done");
+		clearHtml('#creation-' + clipId);
+		appendTxt('#creation-' + clipId, '<b>Clip Done</b>');
 	});
 	//I guess I can try putting the finish message here
 }
