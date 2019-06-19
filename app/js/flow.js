@@ -1,5 +1,6 @@
 const path = require('path');
 const fs = require('fs');
+const spawn = require('child_process').spawn;
 var ffmpeg = require('ffmpeg-static');
 var ffpath = ffmpeg.path;
 var filePaths = [];
@@ -74,7 +75,22 @@ function runCommand(clipId){
 	}
 	console.log(command);
 	appendTxt('#queueCol-1-' + clipId, '<b id="creation-' + clipId + '">Clip Creation has started. Be Patient.</b>');
-	//$('#queueCol-1-' + clipId).append("ayy lmao");
+
+	const ffCmd = spawn(ffpath, command);
+	ffCmd.stderr.on('data', (data) => {
+		console.log(`ffmpeg stderr: ${data}`);
+	});
+
+	ffCmd.on('close', (code) => {
+		console.log('Command Done');
+		appendTxt('#creation-' + clipId, '<b>Clip Done</b>');
+	});
+
+	ffCmd.on('error', (err) => {
+		console.log('FFmpeg Command Issue: ' + err);
+	});
+
+	/* Going to try and get stderr from the command as it runs
 	var exec = require('child_process').exec, child;
 	child = exec(command,
 	function (error, stdout, stderr) {
@@ -89,6 +105,8 @@ function runCommand(clipId){
 		appendTxt('#creation-' + clipId, '<b>Clip Done</b>');
 	});
 	//I guess I can try putting the finish message here
+	*/
+
 }
 
 function ffCommand(filmId, vChoice, aChoice, sChoice, start, dur, crf, extension, clipName) {
@@ -99,9 +117,14 @@ function ffCommand(filmId, vChoice, aChoice, sChoice, start, dur, crf, extension
 		}
 	}
 	console.log("vChoice: " + vChoice + " aChoice: " + aChoice + " sChoice: " + sChoice);
+	
+	var commandArr = [];
+	var subtitleArr = [];
 	var clipPath = path.dirname(workingFilm.filepath) + '/' + clipName + '.' + extension;
-	var outPath = '"' + clipPath + '"';
+	
+	/*
 	var command = ffpath + ' -y -hide_banner';
+	var outPath = '"' + clipPath + '"';
 	var ffStart = '-ss ' + start;
 	var ffIn = '-i "' + workingFilm.filepath + '"';
 	var ffDur = '-t ' + dur;
@@ -113,25 +136,27 @@ function ffCommand(filmId, vChoice, aChoice, sChoice, start, dur, crf, extension
 	var ffCa = '-c:a aac';
 	var ffCompMap = '-map "[v]"';
 	var subtitleCmd = '';
+	var ffCrop
+	var ffScale
+	var ffCropScale
+	*/
 	var fastSubReg = /.*(pgs|PGS|dvd_subtitle).*/;
 	var fastSub = 0;
-	//var ffCrop
-	//var ffScale
-	//var ffCropScale
+	
+	commandArr.push('-y', '-hide_banner');
 	
 	//Check for subtitles
 	if (sChoice >= 0){
 		if (sChoice >= workingFilm.subtitle.length){
 			var extSubInd = sChoice - workingFilm.subtitle.length;	
 			var extSubPath = workingFilm.extSubs[extSubInd];
-			subtitleCmd += '-vf "subtitles=' + extSubPath + '"';	
+			subtitleArr.push('-vf', 'subtitles=' + extSubPath);
 		} else {
 			if (fastSubReg.test(workingFilm.subtitle[sChoice])){
-				subtitleCmd += '-filter_complex "[0:v:' + vChoice + 
-				'][0:s:' + sChoice + ']overlay[v]" ' + ffCompMap;	
-				fastSub = 1;
+				subtitleArr.push('-filter_complex', '[0:v:' + vChoice + 
+				'][0:s:' + sChoice + ']overlay[v]', '-map', '[v]');
 			} else{
-				subtitleCmd += '-vf "subtitles=' + workingFilm.filepath + ':si=' + sChoice + '"';	
+				subtitleArr.push('-vf', 'subtitles=' + workingFilm.filepath + ':si=' + sChoice);
 			}
 		}
 	}
@@ -139,31 +164,41 @@ function ffCommand(filmId, vChoice, aChoice, sChoice, start, dur, crf, extension
 	if (sChoice >= 0){
 		if (fastSub == 1){
 			if (aChoice == -1){
-				command += ' ' + ffStart + ' ' + ffIn + ' ' + ffDur + ' ' + subtitleCmd + 
-				' ' + ffCv + ' -an ' + ffCrf + ' ' + outPath;	
+				commandArr.push('-ss', start, '-i', workingFilm.filepath, '-t', dur); 
+				commandArr = commandArr.concat(subtitleArr);
+				commandArr.push('-c:v', 'libx264', '-an', '-crf', crf, clipPath);
 			} else{
-				command += ' ' + ffStart + ' ' + ffIn + ' ' + ffDur + ' ' + subtitleCmd + 
-				' ' + ffAmap + ' ' + ffCv + ' ' + ffCa + ' ' + ffCrf + ' ' + outPath;	
+				commandArr.push('-ss', start, '-i', workingFilm.filepath, '-t', dur);
+				commandArr = commandArr.concat(subtitleArr);
+				commandArr.push('-map', '0:a:' + aChoice, '-c:v', 'libx264', '-c:a', 'aac', '-crf', crf, clipPath);
 			}
 		} else{
 			if (aChoice == -1){
-				command += ' ' + ffIn + ' ' + ffStart + ' ' + ffDur + ' ' + ffVmap + ' ' + subtitleCmd + 
-				' ' + ffCv + ' -an ' + ffCrf + ' ' + outPath;
+				commandArr.push('-i', workingFilm.filepath, '-ss', start, 
+				'-t', dur, '-map', '0:v:' + vChoice,); 
+				commandArr = commandArr.concat(subtitleArr);
+				commandArr.push('-c:v', 'libx264', '-an', '-crf', crf, clipPath);
+			
 			} else{
-				command += ' ' + ffIn + ' ' + ffStart + ' ' + ffDur + ' ' + ffVmap + ' ' + subtitleCmd + 
-				' ' + ffAmap + ' ' + ffCv + ' ' + ffCa + ' ' + ffCrf + ' ' + outPath;
+				commandArr.push('-i', workingFilm.filepath, '-ss', start, 
+				'-t', dur, '-map', '0:v:' + vChoice); 
+				commandArr = commandArr.concat(subtitleArr);
+				commandArr.push('-map', '0:a:' + aChoice, '-c:v', 'libx264', 
+				'-c:a', 'aac', '-crf', crf, clipPath);
 			}
 		}
 	} else {
 		if (aChoice == -1){
-			command += ' ' + ffStart + ' ' + ffIn + ' ' + ffDur + ' ' + ffVmap + ' ' + 
-			ffCv + ' -an ' + ffCrf + ' ' + outPath; 
+			commandArr.push('-ss', start, '-i', workingFilm.filepath, '-t', dur, 
+			'-map', '0:v:' + vChoice, '-c:v', 'libx264', '-an', 
+			'-crf', crf, clipPath);
 		} else{
-			command += ' ' + ffStart + ' ' + ffIn + ' ' + ffDur + ' ' + ffVmap + ' ' + 
-			ffAmap + ' ' + ffCv + ' ' + ffCa + ' ' + ffCrf + ' ' + outPath; 
+			commandArr.push('-ss', start, '-i', workingFilm.filepath, '-t', dur, 
+			'-map', '0:v:' + vChoice, '-map', '0:a:' + aChoice, '-c:v', 'libx264', 
+			'-c:a', 'aac', '-crf', crf, clipPath);
 		}
 	} 
-	return command;
+	return commandArr
 }
 
 function clipQueue(start, dur, crf, extension, clipName, clipCount, command){
@@ -293,7 +328,7 @@ function filmForm(film){
 	//start time
 	appendTxt("#form-" + id, '<div class="formRow" id="startRow-' + id + '"></div>');
 	appendTxt("#startRow-" + id, '<div class="formColumn" id="startCol-' + id + '"></div>');
-	appendTxt("#startCol-" + id, "<b>Clip Start</b>");
+	appendTxt("#startCol-" + id, "<b>Clip Start:</b>");
 	appendTxt("#startRow-" + id, '<div class="formColumn" id="startColEntry-' + id + '"></div>');
 	appendTxt("#startColEntry-" + id, '<input type="text" class="textBox" id="startBox-' + 
 	id + '" placeholder="00:00:00.00">');
@@ -303,7 +338,7 @@ function filmForm(film){
 	//duration
 	appendTxt("#form-" + id, '<div class="formRow" id="durRow-' + id + '"></div>');
 	appendTxt("#durRow-" + id, '<div class="formColumn" id="durCol-' + id + '"></div>');
-	appendTxt("#durCol-" + id, "<b>Clip Duration</b>");
+	appendTxt("#durCol-" + id, "<b>Clip Duration:</b>");
 	appendTxt("#durRow-" + id, '<div class="formColumn" id="durColEntry-' + id + '"></div>');
 	appendTxt("#durColEntry-" + id, '<input type="text" class="textBox" id="durBox-' + id + '" placeholder="1:00">');
 	appendTxt("#form-" + id, "<br>");
@@ -312,9 +347,11 @@ function filmForm(film){
 	//crf value
 	appendTxt("#form-" + id, '<div class="formRow" id="crfRow-' + id + '"></div>');
 	appendTxt("#crfRow-" + id, '<div class="formColumn" id="crfCol-' + id + '"></div>');
-	appendTxt("#crfCol-" + id, "<b>Quality Level</b>");
+	appendTxt("#crfCol-" + id, "<b>Quality Level:</b>");
 	appendTxt("#crfRow-" + id, '<div class="formColumn" id="crfColEntry-' + id + '"></div>');
-	appendTxt("#crfColEntry-" + id, '<input type="text" class="textBox" id="crfBox-' + id + '" placeholder="18-32">');
+	appendTxt("#crfColEntry-" + id, '<input type="text" class="textBox" id="crfBox-' + id + 
+	'" placeholder="18-32, lower # = higher quality">');
+	
 	appendTxt("#form-" + id, "<br>");
 	
 
