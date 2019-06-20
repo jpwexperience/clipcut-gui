@@ -304,7 +304,7 @@ function filmForm(film){
 	if (film.subtitle.length + film.extSubs.length == 0){
 		appendTxt("#form-" + id, "<b>No Subtitles Available</b><br>");
 		appendTxt("#form-" + id, '<input type="radio" name="sStreams-' + id + '" ' + 
-		'id="sStreams-nosub-"' + id + '" value="-1"> No Subtitles<br>');
+		'id="sStreams-nosub-' + id + '" value="-1"> No Subtitles<br>');
 		radioCheck("#sStreams-nosub-" + id, true);
 	} else{
 		appendTxt("#form-" + id, "<b>Subtitle Streams</b><br>");
