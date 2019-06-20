@@ -432,7 +432,7 @@ function streamProcess(results, filepath) {
 }
 
 function ffprobe(filepath) {
-	var command = ffpath + ' -hide_banner -i "' + filepath + '"';
+	var command = '"' + ffpath + '" -hide_banner -i "' + filepath + '"';
 	var exec = require('child_process').exec, child;
 	child = exec(command,
 	function (error, stdout, stderr) {
