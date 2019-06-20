@@ -1,7 +1,7 @@
 {
-  "name": "bashelectro",
+  "name": "ClipCut-GUI",
   "version": "1.0.0",
-  "description": "Bash and Javascript",
+  "description": "GUI program to aid in cutting clips from video files.",
   "main": "app/main.js",
   "scripts": {
     "start": "electron-forge start",
@@ -10,14 +10,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/darumswizel/bashelectro.git"
+    "url": "git+https://github.com/jpwexperience/clipcut-gui.git"
   },
   "author": "John Williams",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/darumswizel/bashelectro/issues"
+    "url": "https://github.com/jpwexperience/clipcut-gui/issues"
   },
-  "homepage": "https://github.com/darumswizel/bashelectro#readme",
+  "homepage": "https://github.com/jpwexperience/clipcut-gui#readme",
   "devDependencies": {
     "babel-plugin-transform-async-to-generator": "^6.24.1",
     "babel-preset-env": "^1.7.0",
@@ -51,7 +51,7 @@
         "packageManager": "npm"
       },
       "electronWinstallerConfig": {
-        "name": "bashelectro"
+        "name": "ClipCut-GUI"
       },
       "electronInstallerDebian": {},
       "electronInstallerRedhat": {},
@@ -61,7 +61,7 @@
       },
       "windowsStoreConfig": {
         "packageName": "",
-        "name": "bashelectro"
+        "name": "ClipCut-GUI"
       }
     }
   }
