@@ -56,8 +56,8 @@
       "electronInstallerDebian": {},
       "electronInstallerRedhat": {},
       "github_repository": {
-        "owner": "",
-        "name": ""
+        "owner": "John Williams",
+        "name": "ClipCut-GUI"
       },
       "windowsStoreConfig": {
         "packageName": "",

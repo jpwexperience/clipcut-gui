@@ -74,11 +74,11 @@ function removeFilm(filmId, elemId) {
 }
 
 function totalDur(time){
-	console.log('time: ' + time);
+	//console.log('time: ' + time);
 	var durArr = time.split(':');
 	var len = durArr.length;
 	var durNum = [];
-	console.log(durArr);
+	//console.log(durArr);
 	for (var i = 0; i < len; i++){
 		durNum.push(parseInt(durArr[i]));
 	}
@@ -114,7 +114,7 @@ function progUpdate(line, clipId, duration){
 function showFile(clipId){
 	var clip = findClip(clipId);
 	var path = clip.command[clip.command.length - 1];
-	console.log(path);
+	//console.log(path);
 	shell.showItemInFolder(path);
 }
 
@@ -131,7 +131,7 @@ function runCommand(clipId){
 	var duration = command[command.findIndex(element => element === '-t') + 1];
 	var durSec = totalDur(duration);
 
-	console.log(command);
+	//console.log(command);
 
 	const ffCmd = spawn(ffpath, command);
 	ffCmd.stderr.on('data', (data) => {
@@ -157,7 +157,7 @@ function runCommand(clipId){
 
 function ffCommand(filmId, vChoice, aChoice, sChoice, start, dur, crf, extension, clipName) {
 	var workingFilm = findFilm(filmId);
-	console.log("vChoice: " + vChoice + " aChoice: " + aChoice + " sChoice: " + sChoice);
+	//console.log("vChoice: " + vChoice + " aChoice: " + aChoice + " sChoice: " + sChoice);
 	
 	var commandArr = [];
 	var subtitleArr = [];
@@ -176,6 +176,7 @@ function ffCommand(filmId, vChoice, aChoice, sChoice, start, dur, crf, extension
 			subtitleArr.push('-vf', 'subtitles=' + extSubPath);
 		} else {
 			if (fastSubReg.test(workingFilm.subtitle[sChoice])){
+				fastSub = 1;
 				subtitleArr.push('-filter_complex', '[0:v:' + vChoice + 
 				'][0:s:' + sChoice + ']overlay[v]', '-map', '[v]');
 			} else{
@@ -192,6 +193,7 @@ function ffCommand(filmId, vChoice, aChoice, sChoice, start, dur, crf, extension
 				commandArr.push('-c:v', 'libx264', '-an', '-crf', crf, clipPath);
 			} else{
 				commandArr.push('-ss', start, '-i', workingFilm.filepath, '-t', dur);
+				//console.log(subtitleArr);
 				commandArr = commandArr.concat(subtitleArr);
 				commandArr.push('-map', '0:a:' + aChoice, '-c:v', 'libx264', '-c:a', 'aac', '-crf', crf, clipPath);
 			}
@@ -221,6 +223,7 @@ function ffCommand(filmId, vChoice, aChoice, sChoice, start, dur, crf, extension
 			'-c:a', 'aac', '-crf', crf, clipPath);
 		}
 	} 
+	console.log(commandArr);
 	return commandArr
 }
 
@@ -268,7 +271,7 @@ function emptyCheck(elem, val) {
 }
 
 function formProcess(id, emptyName){
-	console.log("Form ID: " + id);
+	//console.log("Form ID: " + id);
 	
 	var vChoice = $("input[name=vStreams-" + id + "]:checked").val();
 	var aChoice = $("input[name=aStreams-" + id + "]:checked").val();
@@ -457,10 +460,10 @@ function streamProcess(results, filepath) {
                         extSubs.push(extSub);
                 }
         }
-	console.log("Video Streams: " + vStreams);
-	console.log("Audio Streams: " + aStreams);
-	console.log("Subtitle Streams: " + sStreams);
-	console.log("External Subtitles: " + extSubs);
+	//console.log("Video Streams: " + vStreams);
+	//console.log("Audio Streams: " + aStreams);
+	//console.log("Subtitle Streams: " + sStreams);
+	//console.log("External Subtitles: " + extSubs);
 	var newFilm = new Film(filmCount, filepath, vStreams, aStreams, sStreams, extSubs)
 	films.push(newFilm);
 	filmCount++;
