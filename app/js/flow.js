@@ -1,6 +1,7 @@
 const path = require('path');
 const fs = require('fs');
 const spawn = require('child_process').spawn;
+const {shell} = require('electron');
 var ffmpeg = require('ffmpeg-static');
 var ffpath = ffmpeg.path;
 var filePaths = [];
@@ -45,6 +46,14 @@ function radioCheck(name, val){
 	});
 }
 
+function findFilm(filmId){
+	return films.find(Film => Film.id == filmId);
+}
+
+function findClip(clipId){
+	return clips.find(Clip => Clip.id == clipId);
+}
+
 //Clears the html within an element
 function clearHtml(elemId) {
         $(elemId).html("");
@@ -52,94 +61,108 @@ function clearHtml(elemId) {
 
 //Removes html within an element
 function removeClip(clipId, elemId) {
-	var clipIndex = -1;
-	for (var i = 0; i < clips.length; i++){
-		var tempClip = clips[i];
-		if (tempClip.id == clipId){
-			clipIndex = i;
-			break;
-		}
-	}
+	var tempClip = findClip(clipId);
         $("div").remove(elemId);
-	clips.splice(clipIndex, 1);
+	clips.splice(clips.indexOf(tempClip), 1);
+}
+
+//Removes html within an element
+function removeFilm(filmId, elemId) {
+	var tempFilm = findFilm(filmId);
+        $("div").remove(elemId);
+	films.splice(films.indexOf(tempFilm), 1);
+}
+
+function totalDur(time){
+	console.log('time: ' + time);
+	var durArr = time.split(':');
+	var len = durArr.length;
+	var durNum = [];
+	console.log(durArr);
+	for (var i = 0; i < len; i++){
+		durNum.push(parseInt(durArr[i]));
+	}
+	//hours first, then minutes, then seconds
+	if(len == 1){
+		return Math.floor(durNum[0]);
+	} else if(len == 2){
+		return Math.floor(durNum[1] + (60 * durNum[0]));	
+	} else if(len == 3){
+		return Math.floor(durNum[2] + (60 * durNum[1]) + (3600 * durNum[0]));	
+	} else{
+		console.log('Too many things. Default to 1:00');
+		return 60;
+	}
+}
+
+function progUpdate(line, clipId, duration){
+	var timeRegex = /time=[0-9][0-9]:[0-9][0-9]:[0-9][0-9][.][0-9]*/; 
+	var time = line.toString().match(timeRegex);
+	if (time){
+		var time = time[0].substring(5);
+		var timeSec = totalDur(time);
+		var percentDone = Math.floor((timeSec / duration) * 100);
+		appendTxt('#infoOut-' + clipId, '<p>Stderr Time: ' + time + '  Time in Seconds: ' + timeSec + 
+			'Percentage: ' + percentDone.toString() + '%</p>');
+		if (percentDone > 10){
+			$('#progBar-' + clipId).css('width', percentDone + '%');
+		}
+		$('#progBar-' + clipId).html(percentDone + '%');
+	}
+}
+
+function showFile(clipId){
+	var clip = findClip(clipId);
+	var path = clip.command[clip.command.length - 1];
+	console.log(path);
+	shell.showItemInFolder(path);
 }
 
 function runCommand(clipId){
-	var command = "";
-	for (var i = 0; i < clips.length; i++){
-		var tempClip = clips[i];
-		if (tempClip.id == clipId){
-			command = tempClip.command;
-			break;
-		}
-	}
+	$('#startBut-' + clipId).attr('disabled', true);
+	$('#startBut-' + clipId).css('background', '#1b2532');
+	$('#startBut-' + clipId).css('cursor', 'none');
+	appendTxt('#clipInfo-' + clipId, '<p class="processing" id="processing-' + clipId + '"><b>Processing Clip</b>' + 
+	'<span><b>.</b></span><span><b>.</b></span><span><b>.</b></span></p>');
+	appendTxt('#clipInfo-' + clipId, '<div class="progBar" id="progBar-' + clipId + '">0%</div><br>');
+
+	var tempClip = findClip(clipId);
+	var command = tempClip.command;
+	var duration = command[command.findIndex(element => element === '-t') + 1];
+	var durSec = totalDur(duration);
+
 	console.log(command);
-	appendTxt('#queueCol-1-' + clipId, '<b id="creation-' + clipId + '">Clip Creation has started. Be Patient.</b>');
 
 	const ffCmd = spawn(ffpath, command);
 	ffCmd.stderr.on('data', (data) => {
 		console.log(`ffmpeg stderr: ${data}`);
+		progUpdate(data, clipId, durSec);
 	});
 
 	ffCmd.on('close', (code) => {
 		console.log('Command Done');
-		appendTxt('#creation-' + clipId, '<b>Clip Done</b>');
+		$('button').remove('#startBut-' + clipId);
+		$('#progBar-' + clipId).html('Clip Cut Complete.');
+		$('p').remove('#processing-' + clipId);
+		appendTxt('#queueCol-1-' + clipId, '<br>');
+		appendTxt('#queueButCol-0-' + clipId, '<button class="queueButton" id="openFile-' + clipId + 
+		'" type="button" ' + 'onclick="showFile(' + clipId + ')">Show Clip in Folder</button>');
 	});
 
 	ffCmd.on('error', (err) => {
 		console.log('FFmpeg Command Issue: ' + err);
 	});
 
-	/* Going to try and get stderr from the command as it runs
-	var exec = require('child_process').exec, child;
-	child = exec(command,
-	function (error, stdout, stderr) {
-		child.stderr.pipe(process.stderr);
-		if (error !== null) {
-			console.log('exec error: ' + error);
-		}
-		console.log('stdout: ' + stdout);
-		console.log('stderr: ' + stderr);
-		console.log("command done");
-		clearHtml('#creation-' + clipId);
-		appendTxt('#creation-' + clipId, '<b>Clip Done</b>');
-	});
-	//I guess I can try putting the finish message here
-	*/
-
 }
 
 function ffCommand(filmId, vChoice, aChoice, sChoice, start, dur, crf, extension, clipName) {
-	var workingFilm;
-	for (var i = 0; i < films.length; i++){
-		if (films[i].id == filmId){
-			workingFilm = films[i];
-		}
-	}
+	var workingFilm = findFilm(filmId);
 	console.log("vChoice: " + vChoice + " aChoice: " + aChoice + " sChoice: " + sChoice);
 	
 	var commandArr = [];
 	var subtitleArr = [];
 	var clipPath = path.dirname(workingFilm.filepath) + '/' + clipName + '.' + extension;
 	
-	/*
-	var command = ffpath + ' -y -hide_banner';
-	var outPath = '"' + clipPath + '"';
-	var ffStart = '-ss ' + start;
-	var ffIn = '-i "' + workingFilm.filepath + '"';
-	var ffDur = '-t ' + dur;
-	var ffCrf = '-crf ' + crf;
-	var ffOut = '"' + clipPath + '"';
-	var ffVmap = '-map 0:v:' + vChoice;
-	var ffAmap = '-map 0:a:' + aChoice;
-	var ffCv = '-c:v libx264';
-	var ffCa = '-c:a aac';
-	var ffCompMap = '-map "[v]"';
-	var subtitleCmd = '';
-	var ffCrop
-	var ffScale
-	var ffCropScale
-	*/
 	var fastSubReg = /.*(pgs|PGS|dvd_subtitle).*/;
 	var fastSub = 0;
 	
@@ -206,22 +229,28 @@ function clipQueue(start, dur, crf, extension, clipName, clipCount, command){
 
 	appendTxt('.clipQueue', '<div class="queueBox" id="clip-' + clipCount + '"></div>');
 
-	appendTxt('#clip-' + clipCount, '<div class="queueRow" id="queueRow-' + clipCount + '">');	
-	appendTxt('#queueRow-' + clipCount, '<div class="queueCol" id="queueCol-0-' + clipCount + '">');
-	appendTxt('#queueCol-0-' + clipCount, '<b>Clip Name: ' + clipName + '.' + extension + '</b><br>');
-	appendTxt('#queueCol-0-' + clipCount, '<b>Start: ' + start + '</b><br>');
-	appendTxt('#queueCol-0-' + clipCount, '<b>Duration: ' + dur + '</b><br>');
-	appendTxt('#queueCol-0-' + clipCount, '<b>Quality Level: ' + crf + '</b><br>');
-	//appendTxt('#queueCol-0-' + clipCount, '<b>FFmpeg Command: ' + command + '</b><br>');
-	appendTxt('#queueRow-' + clipCount, '<div class="queueCol" id="queueCol-1-' + clipCount + '">');
+	appendTxt('#clip-' + clipCount, '<div class="clipInfo" id="clipInfo-' + clipCount + '">');	
+	//appendTxt('#queueRow-' + clipCount, '<div class="queueCol" id="queueCol-0-' + clipCount + '">');
+	appendTxt('#clipInfo-' + clipCount, '<p><b>Clip Name: ' + clipName + '.' + extension + '</b><p>');
+	/*
+	appendTxt('#queueCol-0-' + clipCount, '<p><b>Start: ' + start + '</b><br>');
+	appendTxt('#queueCol-0-' + clipCount, '<p><b>Duration: ' + dur + '</b></p>');
+	appendTxt('#queueCol-0-' + clipCount, '<p><b>Quality Level: ' + crf + '</b></p>');
+	*/
+	//appendTxt('#queueRow-' + clipCount, '<div class="queueCol" id="queueCol-1-' + clipCount + '">');
+
+	//appendTxt('#queueCol-1-' + clipCount, '<div class="infoOut" id="infoOut-' + clipCount + '"></div>');
 
 	appendTxt('#clip-' + clipCount, '<div class="queueButtons" id="queueButtons-' + clipCount + '"></div>');
-	appendTxt('#queueButtons-' + clipCount, '<button class="queueButton" type="button" ' + 
-	'onclick="runCommand(' + clipCount + ')">Start Cutting Clip</button>');
 
-	appendTxt("#queueButtons-" + clipCount, "<br><br>");
+	appendTxt('#queueButtons-' + clipCount, '<div class="queueRow" id="queueButRow-' + clipCount + '"></div>');
+	appendTxt('#queueButRow-' + clipCount, '<div class="queuecol" id="queueButCol-0-' + clipCount + '"></div>');
+	appendTxt('#queueButRow-' + clipCount, '<div class="queuecol" id="queueButCol-1-' + clipCount + '"></div>');
 
-	appendTxt('#queueButtons-' + clipCount, '<button class="queueButton" type="button" ' +
+	appendTxt('#queueButCol-0-' + clipCount, '<button class="queueButton" id="startBut-' + clipCount + 
+	'" type="button" ' + 'onclick="runCommand(' + clipCount + ')">Start Cutting Clip</button>');
+
+	appendTxt('#queueButCol-1-' + clipCount, '<button class="queueButton" type="button" ' +
 	'onclick="removeClip(' + clipCount + ', \'#clip-' + clipCount + '\')">Remove from Queue</button>');
 
 }
@@ -261,7 +290,7 @@ function formProcess(id, emptyName){
 
 function filmForm(film){
 	var id = film.id;
-	appendTxt(".clipForm", '<br><div id="inputDiv-' + id +'" class="inputDiv"></div>');
+	appendTxt(".clipForm", '<div id="inputDiv-' + id +'" class="inputDiv"><br></div>');
 	appendTxt("#inputDiv-" + id, '<form method="post" id="form-' + id + '"></form>');
 	appendTxt("#form-" + id, "<b>Filename: " + path.basename(film.filepath) + "</b><br><br>"); 
 
@@ -379,9 +408,16 @@ function filmForm(film){
 	appendTxt("#form-" + id, "<br>");
 	appendTxt("#form-" + id, "<br>");
 
-	//submit button
-	appendTxt("#form-" + id, '<button id="submit-' + id + '" type="button" class="button" ' + 
+	//submit buttons
+	appendTxt('#form-' + id, '<div class="formRow" id="filmBut-' + id + '"></div>');
+	appendTxt('#filmBut-' + id, '<div class="formColumn" id="submitCol-' + id +'"></div>');
+	appendTxt('#filmBut-' + id, '<div class="formColumn" id="removeCol-' + id +'"></div>');
+	
+	appendTxt("#submitCol-" + id, '<button id="submit-' + id + '" type="button" class="button" ' + 
 	'onclick="formProcess(' + id + ', \'' + nameHolder + '\')">Add Clip to Queue</button>');
+
+	appendTxt('#removeCol-' + id, '<button class="queueButton" type="button" ' +
+	'onclick="removeFilm(' + id + ', \'#inputDiv-' + id + '\')">Remove Film</button>');
 }
 
 function streamProcess(results, filepath) {
@@ -448,11 +484,7 @@ function ffprobe(filepath) {
 
 //Processes input files from button
 function fileUp() {
-	films = [];
         filePaths = [];
-        //clear screen when new files are presented
-        clearHtml(".clipForm");
-        //clearHtml("ffOut");
         var x = document.getElementById("upFile");
         var txt = "";
         if ('files' in x) {
@@ -480,13 +512,10 @@ function fileUp() {
                         // If the browser does not support the files property, it will return the path of the selected file instead.
                         txt  += "<br>The path of the selected file: " + x.value;                }
         }
-	//appendTxt(".clipForm", txt);
+	console.log(films);
+	console.log(filePaths);
 	for (var i = 0; i < filePaths.length; i++){
 		var tempPath = filePaths[i];
 		ffprobe(tempPath);
         }
 }
-
-//appendTxt(".main", "ffmpeg static path: " + ffmpeg.path);
-
-
