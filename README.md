@@ -5,7 +5,7 @@ Allows you to select the video, audio, and subtitle stream to create the clip wi
 
 Currently all clips are encoded with x264 and AAC. 
 
-Don't have any error checking on the form as of now so I'll formated entries will likely cause problems.
+Don't have any error checking on the form as of now so ill formated entries will likely cause problems.
 
 Getting Started:
 1. Clone repository
