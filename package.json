@@ -1,5 +1,5 @@
 {
-  "name": "ClipCut-GUI",
+  "name": "ClipCut",
   "version": "1.0.0",
   "description": "GUI program to aid in cutting clips from video files.",
   "main": "app/main.js",
@@ -37,18 +37,11 @@
   },
   "config": {
     "forge": {
-      "make_targets": {
-        "win32": [
-          "squirrel"
-        ],
-        "darwin": [
-          "zip"
-        ],
-        "linux": [
-          "deb",
-          "rpm"
-        ]
-      },
+	    "make_targets": {
+	    "win32": ["squirrel", "zip"], 
+	    "darwin": ["zip", "dmg"], 
+	    "linux": ["deb", "rpm", "zip"] 
+  },
       "electronPackagerConfig": {
         "packageManager": "npm"
       },

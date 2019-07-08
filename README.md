@@ -5,6 +5,8 @@ Allows you to select the video, audio, and subtitle stream to create the clip wi
 
 Currently all clips are encoded with x264 and AAC. 
 
+External subtitles are searched for in the video file firectory.
+
 Don't have any error checking on the form as of now so ill formated entries will likely cause problems.
 
 Getting Started:
