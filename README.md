@@ -12,8 +12,8 @@ Getting Started:
 2. run 'npm install' while in repository
 3. run 'npm start'
 
-User Input Options:
-Clip Start: Timecode (00:00:00.00) or number of seconds of when the clip should start
-Clip Duration: Length of the clip in timecode or seconds
-Quality Level: The crf value when encoding with x264. The lower the number, the higher the quality. Sane range is 18-32. 
-Clip Name: The name of the newly generated clip. Currently the clip will be generated within the directory of the source video.
+User Input Options:<br />
+Clip Start: Timecode (00:00:00.00) or number of seconds of when the clip should start<br />
+Clip Duration: Length of the clip in timecode or seconds<br />
+Quality Level: The crf value when encoding with x264. The lower the number, the higher the quality. Sane range is 18-32.<br />
+Clip Name: The name of the newly generated clip. Currently the clip will be generated within the directory of the source video.<br />

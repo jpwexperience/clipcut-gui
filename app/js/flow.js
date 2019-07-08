@@ -97,6 +97,11 @@ function totalDur(time){
 
 function progUpdate(line, clipId, duration){
 	var timeRegex = /time=[0-9][0-9]:[0-9][0-9]:[0-9][0-9][.][0-9]*/; 
+	var failRegex = /Conversion failed!/;
+	var fail = line.toString().match(failRegex);
+	if (fail){
+		return 1;
+	}
 	var time = line.toString().match(timeRegex);
 	if (time){
 		var time = time[0].substring(5);
@@ -109,6 +114,7 @@ function progUpdate(line, clipId, duration){
 		}
 		$('#progBar-' + clipId).html(percentDone + '%');
 	}
+	return 0;
 }
 
 function showFile(clipId){
@@ -119,10 +125,11 @@ function showFile(clipId){
 }
 
 function runCommand(clipId){
+	var ffError = 0;
 	$('#startBut-' + clipId).attr('disabled', true);
 	$('#startBut-' + clipId).css('background', '#1b2532');
 	$('#startBut-' + clipId).css('cursor', 'none');
-	appendTxt('#clipInfo-' + clipId, '<p class="processing" id="processing-' + clipId + '"><b>Processing Clip</b>' + 
+	appendTxt('#clipInfo-' + clipId, '<p class="processing" id="processing-' + clipId + '"><b>Processing Clip, this can take a while</b>' + 
 	'<span><b>.</b></span><span><b>.</b></span><span><b>.</b></span></p>');
 	appendTxt('#clipInfo-' + clipId, '<div class="progBar" id="progBar-' + clipId + '">0%</div><br>');
 
@@ -135,18 +142,24 @@ function runCommand(clipId){
 
 	const ffCmd = spawn(ffpath, command);
 	ffCmd.stderr.on('data', (data) => {
-		console.log(`ffmpeg stderr: ${data}`);
-		progUpdate(data, clipId, durSec);
+		console.log(`${data}`);
+		ffError = progUpdate(data, clipId, durSec);
 	});
 
 	ffCmd.on('close', (code) => {
 		console.log('Command Done');
 		$('button').remove('#startBut-' + clipId);
-		$('#progBar-' + clipId).html('Clip Cut Complete.');
 		$('p').remove('#processing-' + clipId);
-		appendTxt('#queueCol-1-' + clipId, '<br>');
-		appendTxt('#queueButCol-0-' + clipId, '<button class="queueButton" id="openFile-' + clipId + 
+		if (ffError == 0){
+			$('#progBar-' + clipId).html('Clip Cut Complete.');
+			appendTxt('#queueCol-1-' + clipId, '<br>');
+			appendTxt('#queueButCol-0-' + clipId, '<button class="queueButton" id="openFile-' + clipId + 
 		'" type="button" ' + 'onclick="showFile(' + clipId + ')">Show Clip in Folder</button>');
+		} else {
+			$('#progBar-' + clipId).css('width', '100%');
+			$('#progBar-' + clipId).html('Error Cutting Clip.');
+		}
+
 	});
 
 	ffCmd.on('error', (err) => {
@@ -402,6 +415,8 @@ function filmForm(film){
 	appendTxt("#form-" + id, "<br>");
 
 	//extension choice
+	appendTxt("#form-" + id, "<b>Extension Choice:</b>");
+	appendTxt("#form-" + id, "<br>");
 	appendTxt("#form-" + id, '<input type="radio" id="ext-' + id + '" name="ext-' + id + '" value="mp4"> .mp4');
 	radioCheck("#ext-" + id, true);
 	appendTxt("#form-" + id, "<br>");
@@ -420,11 +435,12 @@ function filmForm(film){
 	'onclick="formProcess(' + id + ', \'' + nameHolder + '\')">Add Clip to Queue</button>');
 
 	appendTxt('#removeCol-' + id, '<button class="queueButton" type="button" ' +
-	'onclick="removeFilm(' + id + ', \'#inputDiv-' + id + '\')">Remove Film</button>');
+	'onclick="removeFilm(' + id + ', \'#inputDiv-' + id + '\')">Remove Video</button>');
+
 }
 
+//Parse out video, audio, and subtitle streams
 function streamProcess(results, filepath) {
-	//appendTxt(".main", results);
 	var streams = [];
 	var vStreams = [];
 	var aStreams = [];
@@ -436,19 +452,27 @@ function streamProcess(results, filepath) {
 	var sReg = /.*Subtitle:.*/;
 	var lines = results.split("\n");
 	for (var i = 0; i < lines.length; i++){
-		//appendTxt(".main", lines[i] + "<br>");
 		if (streamReg.test(lines[i])){
 			streams.push(lines[i]);
 		}
 	}
 	for (var i = 0; i < streams.length; i++){
-		//appendTxt(".main", streams[i] + "<br>");
 		if (vReg.test(streams[i])){
-			vStreams.push(streams[i]);
+			var tempReg = /Stream #\d+:\d+.*: Video:/;
+			var pieces = streams[i].split(tempReg);
+			vStreams.push(pieces[1]);
 		} else if (aReg.test(streams[i])){
-			aStreams.push(streams[i]);
+			var tempReg = /Stream #\d+:\d+\(/;
+			var pieces = streams[i].split(tempReg);
+			var pieces = pieces[1].split(/\): Audio:/);
+			var outStream = '<b>' + pieces[0] + '</b>: ' + pieces[1];
+			aStreams.push(outStream);
 		} else if (sReg.test(streams[i])){
-			sStreams.push(streams[i]);
+			var tempReg = /Stream #\d+:\d+\(/;
+			var pieces = streams[i].split(tempReg);
+			var pieces = pieces[1].split(/\): Subtitle:/);
+			var outStream = '<b>' + pieces[0] + '</b>: ' + pieces[1];
+			sStreams.push(outStream);
 		} else {;}
 	}
 	var dirpath = path.dirname(filepath);
@@ -460,16 +484,15 @@ function streamProcess(results, filepath) {
                         extSubs.push(extSub);
                 }
         }
-	//console.log("Video Streams: " + vStreams);
-	//console.log("Audio Streams: " + aStreams);
-	//console.log("Subtitle Streams: " + sStreams);
-	//console.log("External Subtitles: " + extSubs);
+	//create new film based on stream information
 	var newFilm = new Film(filmCount, filepath, vStreams, aStreams, sStreams, extSubs)
 	films.push(newFilm);
 	filmCount++;
+	//create html form from video input
 	filmForm(newFilm);
 }
 
+//Get ffmpeg information from video file
 function ffprobe(filepath) {
 	var command = '"' + ffpath + '" -hide_banner -i "' + filepath + '"';
 	var exec = require('child_process').exec, child;
@@ -480,6 +503,7 @@ function ffprobe(filepath) {
 		}
 		console.log('stdout: ' + stdout);
 		console.log('stderr: ' + stderr);
+		//send ffmpeg output to parse streams
 		streamProcess(stderr, filepath);
 	});
 }
@@ -492,7 +516,6 @@ function fileUp() {
         var txt = "";
         if ('files' in x) {
         if (x.files.length == 0) {
-                txt = "Select one or more files.";
         } else {
                 for (var i = 0; i < x.files.length; i++) {
                         txt += "<br><strong>" + (i+1) + ".</strong><br>";
@@ -517,6 +540,7 @@ function fileUp() {
         }
 	console.log(films);
 	console.log(filePaths);
+	//run each file through ffmpeg to get information
 	for (var i = 0; i < filePaths.length; i++){
 		var tempPath = filePaths[i];
 		ffprobe(tempPath);

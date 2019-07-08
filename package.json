@@ -31,7 +31,9 @@
     "electron-squirrel-startup": "^1.0.0",
     "ffmpeg-static": "^2.4.0",
     "jquery": "^3.4.1",
-    "rpmbuild": "0.0.22"
+    "query-string": "^6.8.1",
+    "rpmbuild": "0.0.22",
+    "video.js": "^7.5.5"
   },
   "config": {
     "forge": {
