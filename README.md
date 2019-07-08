@@ -14,6 +14,8 @@ Getting Started:
 2. run 'npm install' while in repository
 3. run 'npm start'
 
+Distributables: <a href="https://clipcut.jpwexperience.com" target="_blank">clipcut.jpwexperience.com</a>
+
 User Input Options:<br />
 Clip Start: Timecode (00:00:00.00) or number of seconds of when the clip should start<br />
 Clip Duration: Length of the clip in timecode or seconds<br />
