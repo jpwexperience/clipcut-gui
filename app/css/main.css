@@ -86,6 +86,11 @@ input[type='radio'] {
 	font-size: 12pt;
 }
 
+
+.webmInfo, .gifInfo {
+	display: none;
+}
+
 .row {
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
@@ -144,6 +149,67 @@ input[type='radio'] {
 	padding: 0px;
 }
 
+.cropRow {
+        display: grid;
+        grid-template-columns: 125px 40px 20px 40px;
+        object-fit: cover;
+        grid-gap: 0px;
+        margin: 5px 40px 0px 0px;
+}
+
+.cropCol {
+        background-color: none;
+        line-height: 25px;
+        width: 100%;
+        padding: 0px;
+}
+
+.scaleRow {
+        display: grid;
+        grid-template-columns: 125px 100px;
+        object-fit: cover;
+        grid-gap: 0px;
+        margin: 0px 40px 0px 0px;
+}
+
+.scaleCol {
+        background-color: none;
+        line-height: 25px;
+        width: 100%;
+        padding: 0px;
+}
+
+
+.extRow {
+        display: grid;
+        grid-template-columns: 110px 110px;
+        object-fit: cover;
+        grid-gap: 0px;
+        margin: 5px 40px 0px 0px;
+}
+
+.extCol {
+        background-color: none;
+        line-height: 25px;
+        width: 100%;
+        padding: 0px;
+}
+
+.extraRow {
+        display: grid;
+        grid-template-columns: 110px 110px;
+        object-fit: cover;
+        grid-gap: 0px;
+        margin: 5px 40px 0px 0px;
+}
+
+.extraCol {
+        background-color: none;
+        line-height: 25px;
+        width: 100%;
+        padding: 0px;
+}
+
 
 .inputDiv, .clipProgress {
 	background-color: #abb4c8;
@@ -159,7 +225,7 @@ input[type='radio'] {
 	border-bottom-color: #656ba3;
 }
 
-.textBox, .clipTextBox {
+.textBox, .clipTextBox, .cropBox, .extraBox, .scaleBox {
 	width: 100%;
 	height: 20px;
 	background: #7887a9;
@@ -171,8 +237,12 @@ input[type='radio'] {
 	border-bottom-color: #656ba3;
 }
 
+.cropBox, .scaleBox {
+	text-align: center;
+}
+
 .clipTextBox {
-	width: 50%;
+	width: 100%;
 }
 
 .button, .queueButton {

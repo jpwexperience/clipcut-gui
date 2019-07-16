@@ -18,11 +18,13 @@ class Stream {
 }
 
 class Film {
-        constructor(id, filepath, video, audio, subtitle, extSubs) {
+        constructor(id, filepath, video, audio, subtitle, extSubs, width, height) {
                 this.id = id;
 		this.filepath = filepath;
                 this.video = video;
                 this.audio = audio;
+		this.width = width;
+		this.height = height;
                 this.subtitle = subtitle;
 		this.extSubs = extSubs;
         }
@@ -399,12 +401,34 @@ function filmForm(film){
 	
 	appendTxt("#form-" + id, "<br>");
 	
+	//crop
+	appendTxt('#form-' + id, '<div class="cropRow" id="cropRow-' + id + '"></div>');	
+	appendTxt('#cropRow-' + id, '<div class="cropCol" id="cropCol0-' + id + '"></div>');	
+	appendTxt('#cropCol0-' + id, '<b>Crop:</b>');
+
+	appendTxt('#cropRow-' + id, '<div class="cropCol" id="cropCol1-' + id + '"></div>');	
+	appendTxt("#cropCol1-" + id, '<input type="text" class="cropBox" id="cropBox-' + id + 
+	'" placeholder="' + film.width + '">');
+	
+	appendTxt('#cropRow-' + id, '<div class="cropCol" id="cropCol2-' + id + '"></div>');	
+	appendTxt('#cropCol2-' + id, '<div style="text-align: center;"><b> x </b></div>');
+	
+	appendTxt('#cropRow-' + id, '<div class="cropCol" id="cropCol3-' + id + '"></div>');	
+	appendTxt("#cropCol3-" + id, '<input type="text" class="cropBox" id="cropBox-' + id + 
+	'" placeholder="' + film.height + '">');
+	
+	appendTxt("#form-" + id, "<br>");
+
 
 	//scale
-	
+	appendTxt('#form-' + id, '<div class="scaleRow" id="scaleRow-' + id + '"></div>'); 
+	appendTxt('#scaleRow-' + id, '<div class="scaleCol" id="scaleCol0-' + id + '"></div>'); 
+	appendTxt('#scaleCol0-' + id, '<b>Scale: </b>');
 
-	//crop
-	
+	appendTxt('#scaleRow-' + id, '<div class="scaleCol" id="scaleCol1-' + id + '"></div>'); 
+	appendTxt("#scaleCol1-" + id, '<input type="text" class="scaleBox" id="scaleBox-' + id + 
+	'" placeholder="' + film.width + '">');
+	appendTxt('#form-' + id, '<br>');
 
 	//clip name
 	appendTxt("#form-" + id, "<b>Enter Clip Name:</b>");
@@ -415,16 +439,58 @@ function filmForm(film){
 	appendTxt("#form-" + id, "<br>");
 
 	//extension choice
-	appendTxt("#form-" + id, "<b>Extension Choice:</b>");
-	appendTxt("#form-" + id, "<br>");
-	appendTxt("#form-" + id, '<input type="radio" id="ext-' + id + '" name="ext-' + id + '" value="mp4"> .mp4');
-	radioCheck("#ext-" + id, true);
-	appendTxt("#form-" + id, "<br>");
-	appendTxt("#form-" + id, '<input type="radio" name="ext-' + id + '" value="mov"> .mov');
-	appendTxt("#form-" + id, "<br>");
-	appendTxt("#form-" + id, '<input type="radio" name="ext-' + id + '" value="mkv"> .mkv');
-	appendTxt("#form-" + id, "<br>");
-	appendTxt("#form-" + id, "<br>");
+	appendTxt('#form-' + id, "<b>Extension Choice:</b>");
+	appendTxt('#form-' + id, "<br>");
+	appendTxt('#form-' + id, '<div class="extRow" id="extRow-' + id + '"></div>');
+	appendTxt('#extRow-' + id, '<div class="extCol" id="extCol0-' + id + '"></div>');
+
+	appendTxt('#extCol0-' + id, '<input type="radio" id="ext-' + id + '" name="ext-' + id + '" value="mp4"> .mp4');
+	radioCheck('#ext-' + id, true);
+	appendTxt('#extCol0-' + id, "<br>");
+	appendTxt('#extCol0-' + id, '<input type="radio" name="ext-' + id + '" value="mov"> .mov');
+	appendTxt('#extCol0-' + id, "<br>");
+	appendTxt('#extCol0-' + id, '<input type="radio" name="ext-' + id + '" value="mkv"> .mkv');
+
+	appendTxt('#extRow-' + id, '<div class="extCol" id="extCol1-' + id + '"></div>');
+	appendTxt('#extCol1-' + id, '<input type="radio" name="ext-' + id + '" value="gif"> .gif');
+	appendTxt('#extCol1-' + id, "<br>");
+	appendTxt('#extCol1-' + id, '<input type="radio" name="ext-' + id + '" value="webm"> .webm');
+	appendTxt('#extRow-' + id, "<br>");
+
+	appendTxt('#form-' + id, '<div class="webmInfo" id="webmInfo-' + id + '"></div>');
+	appendTxt('#webmInfo-' + id, '<div class="extraRow" id="webmRow-' + id + '"></div>');
+	appendTxt('#webmRow-' + id, '<div class="extraCol" id="webmCol0-' + id + '"></div>');
+	appendTxt('#webmCol0-' + id, '<b>Bitrate in MB: </b>');
+
+	appendTxt('#webmRow-' + id, '<div class="extraCol" id="webmCol1-' + id + '"></div>');
+	appendTxt("#webmCol1-" + id, '<input type="text" class="extraBox" id="extraBox-' + id + 
+	'" placeholder="0.50">');
+	appendTxt('#webmInfo-' + id, '<br>');
+
+	appendTxt('#form-' + id, '<div class="gifInfo" id="gifInfo-' + id + '"></div>');
+	appendTxt('#gifInfo-' + id, '<div class="extraRow" id="gifRow-' + id + '"></div>');
+	appendTxt('#gifRow-' + id, '<div class="extraCol" id="gifCol0-' + id + '"></div>');
+	appendTxt('#gifCol0-' + id, '<b>Framerate: </b>');
+
+	appendTxt('#gifRow-' + id, '<div class="extraCol" id="gifCol1-' + id + '"></div>');
+	appendTxt("#gifCol1-" + id, '<input type="text" class="extraBox" id="extraBox-' + id + 
+	'" placeholder="23">');
+	appendTxt('#gifInfo-' + id, '<br>');
+
+	$(document).ready(function () {
+		$('input:radio[name="ext-' + id + '"]').change(function() {
+			if ($(this).val() == 'webm') {
+				$('#webmInfo-' + id).css('display', 'inline');
+				$('#gifInfo-' + id).css('display', 'none');
+			} else if ($(this).val() == 'gif') {
+				$('#gifInfo-' + id).css('display', 'inline');
+				$('#webmInfo-' + id).css('display', 'none');
+			} else {
+				$('#webmInfo-' + id).css('display', 'none');
+				$('#gifInfo-' + id).css('display', 'none');
+			}
+		});
+	});
 
 	//submit buttons
 	appendTxt('#form-' + id, '<div class="formRow" id="filmBut-' + id + '"></div>');
@@ -446,6 +512,8 @@ function streamProcess(results, filepath) {
 	var aStreams = [];
 	var sStreams = [];
 	var extSubs = [];
+	var width = 0;
+	var height = 0;
 	var streamReg = /.*Stream #.*/;
 	var vReg = /.*Video:.*/;
 	var aReg = /.*Audio:.*/;
@@ -459,7 +527,12 @@ function streamProcess(results, filepath) {
 	for (var i = 0; i < streams.length; i++){
 		if (vReg.test(streams[i])){
 			var tempReg = /Stream #\d+:\d+.*: Video:/;
+			var sizeReg = /[0-9]+x[0-9]+/;
 			var pieces = streams[i].split(tempReg);
+			var sizePieces = streams[i].match(sizeReg);
+			var sizePieces = sizePieces[0].split('x');
+			width = sizePieces[0];
+			height = sizePieces[1];
 			vStreams.push(pieces[1]);
 		} else if (aReg.test(streams[i])){
 			var tempReg = /Stream #\d+:\d+\(/;
@@ -485,7 +558,7 @@ function streamProcess(results, filepath) {
                 }
         }
 	//create new film based on stream information
-	var newFilm = new Film(filmCount, filepath, vStreams, aStreams, sStreams, extSubs)
+	var newFilm = new Film(filmCount, filepath, vStreams, aStreams, sStreams, extSubs, width, height)
 	films.push(newFilm);
 	filmCount++;
 	//create html form from video input
