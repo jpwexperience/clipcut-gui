@@ -151,7 +151,7 @@ input[type='radio'] {
 
 .cropRow {
         display: grid;
-        grid-template-columns: 125px 40px 20px 40px;
+        grid-template-columns: 125px 55px 20px 55px;
         object-fit: cover;
         grid-gap: 0px;
         margin: 5px 40px 0px 0px;

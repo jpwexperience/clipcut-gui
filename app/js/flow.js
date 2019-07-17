@@ -33,7 +33,11 @@ class Film {
 class Clip {
 	constructor(id, command) {
 		this.id = id;
-		this.command= command;
+		this.command = command;
+		this.palPath;
+		this.palCmd;
+		this.gifCmd;
+		this.tempClipPath;
 	}
 }
 
@@ -131,7 +135,8 @@ function runCommand(clipId){
 	$('#startBut-' + clipId).attr('disabled', true);
 	$('#startBut-' + clipId).css('background', '#1b2532');
 	$('#startBut-' + clipId).css('cursor', 'none');
-	appendTxt('#clipInfo-' + clipId, '<p class="processing" id="processing-' + clipId + '"><b>Processing Clip, this can take a while</b>' + 
+	appendTxt('#clipInfo-' + clipId, '<p class="processing" id="processing-' + clipId + 
+	'"><b>Processing Clip, this can take a while</b>' + 
 	'<span><b>.</b></span><span><b>.</b></span><span><b>.</b></span></p>');
 	appendTxt('#clipInfo-' + clipId, '<div class="progBar" id="progBar-' + clipId + '">0%</div><br>');
 
@@ -142,35 +147,89 @@ function runCommand(clipId){
 
 	//console.log(command);
 
-	const ffCmd = spawn(ffpath, command);
-	ffCmd.stderr.on('data', (data) => {
-		console.log(`${data}`);
-		ffError = progUpdate(data, clipId, durSec);
-	});
+	if(tempClip.palCmd === undefined){
+		const ffCmd = spawn(ffpath, command);
+		ffCmd.stderr.on('data', (data) => {
+			console.log(`${data}`);
+			ffError = progUpdate(data, clipId, durSec);
+		});
 
-	ffCmd.on('close', (code) => {
-		console.log('Command Done');
-		$('button').remove('#startBut-' + clipId);
-		$('p').remove('#processing-' + clipId);
-		if (ffError == 0){
-			$('#progBar-' + clipId).html('Clip Cut Complete.');
-			appendTxt('#queueCol-1-' + clipId, '<br>');
-			appendTxt('#queueButCol-0-' + clipId, '<button class="queueButton" id="openFile-' + clipId + 
-		'" type="button" ' + 'onclick="showFile(' + clipId + ')">Show Clip in Folder</button>');
-		} else {
-			$('#progBar-' + clipId).css('width', '100%');
-			$('#progBar-' + clipId).html('Error Cutting Clip.');
-		}
+		ffCmd.on('close', (code) => {
+			console.log('Command Done');
+			$('button').remove('#startBut-' + clipId);
+			$('p').remove('#processing-' + clipId);
+			if (ffError == 0){
+				$('#progBar-' + clipId).html('Clip Cut Complete.');
+				appendTxt('#queueCol-1-' + clipId, '<br>');
+				appendTxt('#queueButCol-0-' + clipId, '<button class="queueButton" id="openFile-' + clipId + 
+			'" type="button" ' + 'onclick="showFile(' + clipId + ')">Show Clip in Folder</button>');
+			} else {
+				$('#progBar-' + clipId).css('width', '100%');
+				$('#progBar-' + clipId).html('Error Cutting Clip.');
+			}
 
-	});
+		});
 
-	ffCmd.on('error', (err) => {
-		console.log('FFmpeg Command Issue: ' + err);
-	});
+		ffCmd.on('error', (err) => {
+			console.log('FFmpeg Command Issue: ' + err);
+		});
+	} else{
+		const ffCmd = spawn(ffpath, command);
+                ffCmd.stderr.on('data', (data) => {
+                        console.log(`${data}`);
+                });
+                ffCmd.on('close', (code) => {
+			//palette generate
+			const palGen = spawn(ffpath, tempClip.palCmd);
+			palGen.stderr.on('data', (data) => {
+				console.log(`${data}`);
+			});
+			palGen.on('close', (code) => {
+				console.log('palette generated');
+				//gif generate
+				const gifGen = spawn(ffpath, tempClip.gifCmd);
+				gifGen.stderr.on('data', (data) => {
+					console.log(`${data}`);
+					ffError = progUpdate(data, clipId, durSec);
+				});
+				gifGen.on('close', (code) => {
+					$('button').remove('#startBut-' + clipId);
+					$('p').remove('#processing-' + clipId);
+					if (ffError == 0){
+						$('#progBar-' + clipId).html('Clip Cut Complete.');
+						$('#progBar-' + clipId).css('width', '100%');
+						appendTxt('#queueCol-1-' + clipId, '<br>');
+						appendTxt('#queueButCol-0-' + clipId, 
+							'<button class="queueButton" id="openFile-' + clipId + '" type="button" ' + 
+							'onclick="showFile(' + clipId + ')">Show Clip in Folder</button>');
+					} else {
+						$('#progBar-' + clipId).css('width', '100%');
+						$('#progBar-' + clipId).html('Error Cutting Clip.');
+					}
+					console.log('gif generated');
+					console.log('removing temporary files');
+					var exec = require('child_process').exec, child;
+					child = exec('rm ' + tempClip.palPath + '&& rm ' + tempClip.tempClipPath,
+					    function (error, stdout, stderr) {
+						console.log('stdout: ' + stdout);
+						console.log('stderr: ' + stderr);
+						if (error !== null) {
+						     console.log('exec error: ' + error);
+						}
+					    });
+				});
+			});
+                });
+                ffCmd.on('error', (err) => {
+                        console.log('FFmpeg Command Issue: ' + err);
+                });		
+
+	}
+	
 
 }
 
-function ffCommand(filmId, vChoice, aChoice, sChoice, start, dur, crf, extension, clipName) {
+function ffCommand(filmId, vChoice, aChoice, sChoice, start, dur, crf, extension, clipName, width, height, scale, bv, fps) {
 	var workingFilm = findFilm(filmId);
 	//console.log("vChoice: " + vChoice + " aChoice: " + aChoice + " sChoice: " + sChoice);
 	
@@ -180,7 +239,16 @@ function ffCommand(filmId, vChoice, aChoice, sChoice, start, dur, crf, extension
 	
 	var fastSubReg = /.*(pgs|PGS|dvd_subtitle).*/;
 	var fastSub = 0;
+
+	if (extension === 'webm'){
+		var vcodec = 'libvpx';
+		var acodec = 'libvorbis';
+	} else {
+		var vcodec = 'libx264';
+		var acodec = 'aac';
+	}
 	
+
 	commandArr.push('-y', '-hide_banner');
 	
 	//Check for subtitles
@@ -188,12 +256,15 @@ function ffCommand(filmId, vChoice, aChoice, sChoice, start, dur, crf, extension
 		if (sChoice >= workingFilm.subtitle.length){
 			var extSubInd = sChoice - workingFilm.subtitle.length;	
 			var extSubPath = workingFilm.extSubs[extSubInd];
-			subtitleArr.push('-vf', 'subtitles=' + extSubPath);
+			subtitleArr.push('-vf', 'crop=' + width + ':' + height + ', subtitles=' + extSubPath +
+			', scale=' + scale + ':-1');
 		} else {
 			if (fastSubReg.test(workingFilm.subtitle[sChoice])){
 				fastSub = 1;
-				subtitleArr.push('-filter_complex', '[0:v:' + vChoice + 
-				'][0:s:' + sChoice + ']overlay[v]', '-map', '[v]');
+				subtitleArr.push('-filter_complex', 
+				'[0:v:' + vChoice + ']crop=' + width + ':' + height + '[c]; ' + 
+				'[0:s:' + sChoice + ']scale=' + width + ':-1' + '[sub]; ' + 
+				'[c][sub]overlay[s];' +  '[s]scale=' + scale + ':-1[v]', '-map', '[v]');
 			} else{
 				subtitleArr.push('-vf', 'subtitles=' + workingFilm.filepath + ':si=' + sChoice);
 			}
@@ -205,37 +276,59 @@ function ffCommand(filmId, vChoice, aChoice, sChoice, start, dur, crf, extension
 			if (aChoice == -1){
 				commandArr.push('-ss', start, '-i', workingFilm.filepath, '-t', dur); 
 				commandArr = commandArr.concat(subtitleArr);
-				commandArr.push('-c:v', 'libx264', '-an', '-crf', crf, clipPath);
+				commandArr.push('-c:v', vcodec, '-an');
+				if (extension === 'webm'){
+					commandArr.push('-b:v', bv + 'M');
+				}
+				commandArr.push('-crf', crf, clipPath);
 			} else{
 				commandArr.push('-ss', start, '-i', workingFilm.filepath, '-t', dur);
-				//console.log(subtitleArr);
 				commandArr = commandArr.concat(subtitleArr);
-				commandArr.push('-map', '0:a:' + aChoice, '-c:v', 'libx264', '-c:a', 'aac', '-crf', crf, clipPath);
+				commandArr.push('-map', '0:a:' + aChoice, '-c:v', vcodec, '-c:a', acodec);
+				if (extension === 'webm'){
+					commandArr.push('-b:v', bv + 'M');
+				}	
+				commandArr.push('-crf', crf, clipPath);
 			}
 		} else{
 			if (aChoice == -1){
 				commandArr.push('-i', workingFilm.filepath, '-ss', start, 
 				'-t', dur, '-map', '0:v:' + vChoice,); 
 				commandArr = commandArr.concat(subtitleArr);
-				commandArr.push('-c:v', 'libx264', '-an', '-crf', crf, clipPath);
-			
+				commandArr.push('-c:v', vcodec, '-an');
+				if (extension === 'webm'){
+					commandArr.push('-b:v', bv + 'M');
+				}
+				commandArr.push('-crf', crf, clipPath);
 			} else{
 				commandArr.push('-i', workingFilm.filepath, '-ss', start, 
 				'-t', dur, '-map', '0:v:' + vChoice); 
 				commandArr = commandArr.concat(subtitleArr);
-				commandArr.push('-map', '0:a:' + aChoice, '-c:v', 'libx264', 
-				'-c:a', 'aac', '-crf', crf, clipPath);
+				commandArr.push('-map', '0:a:' + aChoice, '-c:v', vcodec, 
+				'-c:a', acodec);
+				if (extension === 'webm'){
+					commandArr.push('-b:v', bv + 'M');
+				}
+				commandArr.push('-crf', crf, clipPath);
 			}
 		}
 	} else {
 		if (aChoice == -1){
 			commandArr.push('-ss', start, '-i', workingFilm.filepath, '-t', dur, 
-			'-map', '0:v:' + vChoice, '-c:v', 'libx264', '-an', 
-			'-crf', crf, clipPath);
+			'-map', '0:v:' + vChoice, '-vf', 'crop=' + width + ':' + height + ',' +  
+			'scale=' + scale + ':-1', '-c:v', vcodec, '-an');	
+			if (extension === 'webm'){
+				commandArr.push('-b:v', bv + 'M');
+			}
+			commandArr.push('-crf', crf, clipPath);
 		} else{
 			commandArr.push('-ss', start, '-i', workingFilm.filepath, '-t', dur, 
-			'-map', '0:v:' + vChoice, '-map', '0:a:' + aChoice, '-c:v', 'libx264', 
-			'-c:a', 'aac', '-crf', crf, clipPath);
+			'-map', '0:v:' + vChoice, '-vf', 'crop=' + width + ':' + height + 
+			', scale=' + scale + ':-1', '-map', '0:a:' + aChoice, '-c:v', vcodec, '-c:a', acodec);
+			if (extension === 'webm'){
+				commandArr.push('-b:v', bv + 'M');
+			}
+			commandArr.push('-crf', crf, clipPath);
 		}
 	} 
 	console.log(commandArr);
@@ -243,31 +336,15 @@ function ffCommand(filmId, vChoice, aChoice, sChoice, start, dur, crf, extension
 }
 
 function clipQueue(start, dur, crf, extension, clipName, clipCount, command){
-	//console.log("clipQueue entered");
-
 	appendTxt('.clipQueue', '<div class="queueBox" id="clip-' + clipCount + '"></div>');
-
 	appendTxt('#clip-' + clipCount, '<div class="clipInfo" id="clipInfo-' + clipCount + '">');	
-	//appendTxt('#queueRow-' + clipCount, '<div class="queueCol" id="queueCol-0-' + clipCount + '">');
 	appendTxt('#clipInfo-' + clipCount, '<p><b>Clip Name: ' + clipName + '.' + extension + '</b><p>');
-	/*
-	appendTxt('#queueCol-0-' + clipCount, '<p><b>Start: ' + start + '</b><br>');
-	appendTxt('#queueCol-0-' + clipCount, '<p><b>Duration: ' + dur + '</b></p>');
-	appendTxt('#queueCol-0-' + clipCount, '<p><b>Quality Level: ' + crf + '</b></p>');
-	*/
-	//appendTxt('#queueRow-' + clipCount, '<div class="queueCol" id="queueCol-1-' + clipCount + '">');
-
-	//appendTxt('#queueCol-1-' + clipCount, '<div class="infoOut" id="infoOut-' + clipCount + '"></div>');
-
 	appendTxt('#clip-' + clipCount, '<div class="queueButtons" id="queueButtons-' + clipCount + '"></div>');
-
 	appendTxt('#queueButtons-' + clipCount, '<div class="queueRow" id="queueButRow-' + clipCount + '"></div>');
 	appendTxt('#queueButRow-' + clipCount, '<div class="queuecol" id="queueButCol-0-' + clipCount + '"></div>');
 	appendTxt('#queueButRow-' + clipCount, '<div class="queuecol" id="queueButCol-1-' + clipCount + '"></div>');
-
 	appendTxt('#queueButCol-0-' + clipCount, '<button class="queueButton" id="startBut-' + clipCount + 
 	'" type="button" ' + 'onclick="runCommand(' + clipCount + ')">Start Cutting Clip</button>');
-
 	appendTxt('#queueButCol-1-' + clipCount, '<button class="queueButton" type="button" ' +
 	'onclick="removeClip(' + clipCount + ', \'#clip-' + clipCount + '\')">Remove from Queue</button>');
 
@@ -287,6 +364,7 @@ function emptyCheck(elem, val) {
 
 function formProcess(id, emptyName){
 	//console.log("Form ID: " + id);
+	var tempFilm = findFilm(id);
 	
 	var vChoice = $("input[name=vStreams-" + id + "]:checked").val();
 	var aChoice = $("input[name=aStreams-" + id + "]:checked").val();
@@ -296,12 +374,36 @@ function formProcess(id, emptyName){
 	var start = emptyCheck($("#startBox-" + id).val(), "0");
 	var dur = emptyCheck($("#durBox-" + id).val(), "1:00");
 	var crf = emptyCheck($("#crfBox-" + id).val(), 18);
+	var cropW = emptyCheck($("#cropBox0-" + id).val(), tempFilm.width);
+	var cropH = emptyCheck($("#cropBox1-" + id).val(), tempFilm.height);
+	var scale = emptyCheck($("#scaleBox-" + id).val(), cropW);
+	var bv = emptyCheck($("#extraBox0-" + id).val(), '0.35');
+	var fps = emptyCheck($("#extraBox1-" + id).val(), '23');
 	var clipName = emptyCheck($("#nameBox-" + id).val(), emptyName); 
+
+	var finalHeight = Math.floor((scale * cropH) / cropW);
+	while(finalHeight % 2 != 0){
+		scale = parseInt(scale) + 1;
+		finalHeight = Math.floor((scale * cropH) / cropW);
+	}
 	
-	var newCommand = ffCommand(id, vChoice, aChoice, sChoice, start, dur, crf, extension, clipName);
+	if(extension === 'gif'){
+		var newCommand = ffCommand(id, vChoice, '-1', sChoice, start, dur, crf, 
+			'mp4', 'temp-clip-' + clipCount, cropW, cropH, scale, bv, fps);
+		var tempClip = new Clip(clipCount, newCommand);
+		var gifPath = path.dirname(tempFilm.filepath) + '/' + clipName + '.gif';
+		tempClip.palPath = path.dirname(tempFilm.filepath) + '/palette-gen-' + clipCount + '.png';
+		tempClip.tempClipPath = newCommand[newCommand.length - 1];
+		tempClip.palCmd = ['-y', '-i', tempClip.tempClipPath, '-vf', 
+			'fps=23,scale=-1:-1:flags=lanczos,palettegen', tempClip.palPath];
+		tempClip.gifCmd = ['-y', '-i', tempClip.tempClipPath, '-i', tempClip.palPath, '-filter_complex',
+			'fps=23,scale=-1:-1:flags=lanczos[x];[x][1:v]paletteuse', gifPath];
+	}else {
+		var newCommand = ffCommand(id, vChoice, aChoice, sChoice, start, dur, crf, 
+			extension, clipName, cropW, cropH, scale, bv, fps);
+		var tempClip = new Clip(clipCount, newCommand);
+	}
 	clipQueue(start, dur, crf, extension, clipName, clipCount, newCommand);
-	var tempClip = new Clip(clipCount, newCommand);
-	//console.log("FFmpeg Command: " + newCommand);
 	clips.push(tempClip);
 	clipCount++;
 }
@@ -396,8 +498,8 @@ function filmForm(film){
 	appendTxt("#crfRow-" + id, '<div class="formColumn" id="crfCol-' + id + '"></div>');
 	appendTxt("#crfCol-" + id, "<b>Quality Level:</b>");
 	appendTxt("#crfRow-" + id, '<div class="formColumn" id="crfColEntry-' + id + '"></div>');
-	appendTxt("#crfColEntry-" + id, '<input type="text" class="textBox" id="crfBox-' + id + 
-	'" placeholder="18-32, lower # = higher quality">');
+	appendTxt("#crfColEntry-" + id, '<input type="number" class="textBox" id="crfBox-' + id + 
+	'" placeholder="lower # = higher quality" value="18" min="0" max="32">');
 	
 	appendTxt("#form-" + id, "<br>");
 	
@@ -407,15 +509,15 @@ function filmForm(film){
 	appendTxt('#cropCol0-' + id, '<b>Crop:</b>');
 
 	appendTxt('#cropRow-' + id, '<div class="cropCol" id="cropCol1-' + id + '"></div>');	
-	appendTxt("#cropCol1-" + id, '<input type="text" class="cropBox" id="cropBox-' + id + 
-	'" placeholder="' + film.width + '">');
+	appendTxt("#cropCol1-" + id, '<input type="number" class="cropBox" id="cropBox0-' + id + 
+	'" placeholder="' + film.width + '" value="' + film.width + '" min="1" max="' + film.width + '">');
 	
 	appendTxt('#cropRow-' + id, '<div class="cropCol" id="cropCol2-' + id + '"></div>');	
 	appendTxt('#cropCol2-' + id, '<div style="text-align: center;"><b> x </b></div>');
 	
 	appendTxt('#cropRow-' + id, '<div class="cropCol" id="cropCol3-' + id + '"></div>');	
-	appendTxt("#cropCol3-" + id, '<input type="text" class="cropBox" id="cropBox-' + id + 
-	'" placeholder="' + film.height + '">');
+	appendTxt("#cropCol3-" + id, '<input type="number" class="cropBox" id="cropBox1-' + id + 
+	'" placeholder="' + film.height + '" value="' + film.height + '" min="1" max="' + film.height + '">');
 	
 	appendTxt("#form-" + id, "<br>");
 
@@ -426,8 +528,8 @@ function filmForm(film){
 	appendTxt('#scaleCol0-' + id, '<b>Scale: </b>');
 
 	appendTxt('#scaleRow-' + id, '<div class="scaleCol" id="scaleCol1-' + id + '"></div>'); 
-	appendTxt("#scaleCol1-" + id, '<input type="text" class="scaleBox" id="scaleBox-' + id + 
-	'" placeholder="' + film.width + '">');
+	appendTxt("#scaleCol1-" + id, '<input type="number" class="scaleBox" id="scaleBox-' + id + 
+	'" placeholder="' + film.width + '" value="' + film.width + '" min="1" max="' + film.width + '">');
 	appendTxt('#form-' + id, '<br>');
 
 	//clip name
@@ -463,8 +565,8 @@ function filmForm(film){
 	appendTxt('#webmCol0-' + id, '<b>Bitrate in MB: </b>');
 
 	appendTxt('#webmRow-' + id, '<div class="extraCol" id="webmCol1-' + id + '"></div>');
-	appendTxt("#webmCol1-" + id, '<input type="text" class="extraBox" id="extraBox-' + id + 
-	'" placeholder="0.50">');
+	appendTxt("#webmCol1-" + id, '<input type="number" class="extraBox" id="extraBox0-' + id + 
+	'" placeholder="0.50" value="0.50" step="0.5" min="0">');
 	appendTxt('#webmInfo-' + id, '<br>');
 
 	appendTxt('#form-' + id, '<div class="gifInfo" id="gifInfo-' + id + '"></div>');
@@ -473,9 +575,20 @@ function filmForm(film){
 	appendTxt('#gifCol0-' + id, '<b>Framerate: </b>');
 
 	appendTxt('#gifRow-' + id, '<div class="extraCol" id="gifCol1-' + id + '"></div>');
-	appendTxt("#gifCol1-" + id, '<input type="text" class="extraBox" id="extraBox-' + id + 
-	'" placeholder="23">');
+	appendTxt("#gifCol1-" + id, '<input type="number" class="extraBox" id="extraBox1-' + id + 
+	'" placeholder="23" value="23" min="0">');
 	appendTxt('#gifInfo-' + id, '<br>');
+
+	//submit buttons
+	appendTxt('#form-' + id, '<div class="formRow" id="filmBut-' + id + '"></div>');
+	appendTxt('#filmBut-' + id, '<div class="formColumn" id="submitCol-' + id +'"></div>');
+	appendTxt('#filmBut-' + id, '<div class="formColumn" id="removeCol-' + id +'"></div>');
+	
+	appendTxt("#submitCol-" + id, '<button id="submit-' + id + '" type="button" class="button" ' + 
+	'onclick="formProcess(' + id + ', \'' + nameHolder + '\')">Add Clip to Queue</button>');
+
+	appendTxt('#removeCol-' + id, '<button class="queueButton" type="button" ' +
+	'onclick="removeFilm(' + id + ', \'#inputDiv-' + id + '\')">Remove Video</button>');
 
 	$(document).ready(function () {
 		$('input:radio[name="ext-' + id + '"]').change(function() {
@@ -490,18 +603,13 @@ function filmForm(film){
 				$('#gifInfo-' + id).css('display', 'none');
 			}
 		});
+		$('#cropBox0-' + id).on('change', function() {
+			if($(this).val() < $('#scaleBox-' + id).val()) {
+				$('#scaleBox-' + id).val($(this).val());
+			}
+			$('#scaleBox-' + id).attr({'max' : $(this).val()});
+		});
 	});
-
-	//submit buttons
-	appendTxt('#form-' + id, '<div class="formRow" id="filmBut-' + id + '"></div>');
-	appendTxt('#filmBut-' + id, '<div class="formColumn" id="submitCol-' + id +'"></div>');
-	appendTxt('#filmBut-' + id, '<div class="formColumn" id="removeCol-' + id +'"></div>');
-	
-	appendTxt("#submitCol-" + id, '<button id="submit-' + id + '" type="button" class="button" ' + 
-	'onclick="formProcess(' + id + ', \'' + nameHolder + '\')">Add Clip to Queue</button>');
-
-	appendTxt('#removeCol-' + id, '<button class="queueButton" type="button" ' +
-	'onclick="removeFilm(' + id + ', \'#inputDiv-' + id + '\')">Remove Video</button>');
 
 }
 
@@ -527,12 +635,13 @@ function streamProcess(results, filepath) {
 	for (var i = 0; i < streams.length; i++){
 		if (vReg.test(streams[i])){
 			var tempReg = /Stream #\d+:\d+.*: Video:/;
-			var sizeReg = /[0-9]+x[0-9]+/;
+			var sizeReg = /, [0-9]+x[0-9]+/;
 			var pieces = streams[i].split(tempReg);
 			var sizePieces = streams[i].match(sizeReg);
 			var sizePieces = sizePieces[0].split('x');
-			width = sizePieces[0];
 			height = sizePieces[1];
+			var widthCut = sizePieces[0].split(', ');
+			width = widthCut[1];
 			vStreams.push(pieces[1]);
 		} else if (aReg.test(streams[i])){
 			var tempReg = /Stream #\d+:\d+\(/;
