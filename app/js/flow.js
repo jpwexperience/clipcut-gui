@@ -62,7 +62,9 @@ function findClip(clipId){
 
 //Clears the html within an element
 function clearHtml(elemId) {
-        $(elemId).html("");
+	$(document).ready(function () {
+		$(elemId).html("");
+	});
 }
 
 //Removes html within an element
@@ -135,9 +137,9 @@ function runCommand(clipId){
 	$('#startBut-' + clipId).attr('disabled', true);
 	$('#startBut-' + clipId).css('background', '#1b2532');
 	$('#startBut-' + clipId).css('cursor', 'none');
-	appendTxt('#clipInfo-' + clipId, '<p class="processing" id="processing-' + clipId + 
-	'"><b>Processing Clip, this can take a while</b>' + 
-	'<span><b>.</b></span><span><b>.</b></span><span><b>.</b></span></p>');
+	appendTxt('#clipInfo-' + clipId, '<div class="processing" id="processing-' + clipId + 
+	'"><p><b>Processing Clip, this can take a while</b>' + 
+	'<span><b>.</b></span><span><b>.</b></span><span><b>.</b></span></p></div>');
 	appendTxt('#clipInfo-' + clipId, '<div class="progBar" id="progBar-' + clipId + '">0%</div><br>');
 
 	var tempClip = findClip(clipId);
@@ -174,18 +176,31 @@ function runCommand(clipId){
 			console.log('FFmpeg Command Issue: ' + err);
 		});
 	} else{
+		clearHtml('#processing-' + clipId);
+		appendTxt('#processing-' + clipId, '<p><b>Generating Temporary Clip, this can take a while</b>' + 
+			'<span><b>.</b></span><span><b>.</b></span><span><b>.</b></span></p>');
+
 		const ffCmd = spawn(ffpath, command);
                 ffCmd.stderr.on('data', (data) => {
                         console.log(`${data}`);
+			ffError = progUpdate(data, clipId, durSec);
                 });
                 ffCmd.on('close', (code) => {
 			//palette generate
+			$('#progBar-' + clipId).css('width', '10%');
+			clearHtml('#processing-' + clipId);
+			appendTxt('#processing-' + clipId, '<p><b>Generating Gif Palette</b>' + 
+				'<span><b>.</b></span><span><b>.</b></span><span><b>.</b></span></p>');
 			const palGen = spawn(ffpath, tempClip.palCmd);
 			palGen.stderr.on('data', (data) => {
 				console.log(`${data}`);
+				ffError = progUpdate(data, clipId, durSec);
 			});
 			palGen.on('close', (code) => {
 				console.log('palette generated');
+				clearHtml('#processing-' + clipId);
+				appendTxt('#processing-' + clipId, '<p><b>Generating Gif</b>' + 
+					'<span><b>.</b></span><span><b>.</b></span><span><b>.</b></span></p>');
 				//gif generate
 				const gifGen = spawn(ffpath, tempClip.gifCmd);
 				gifGen.stderr.on('data', (data) => {
