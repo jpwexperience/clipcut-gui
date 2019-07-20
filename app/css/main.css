@@ -149,6 +149,21 @@ input[type='radio'] {
 	padding: 0px;
 }
 
+.formButRow {
+	display: grid;
+	grid-template-columns: 125px 125px;
+	width: 100%;
+	object-fit: cover;
+	grid-gap: 10px;
+}
+
+.formButCol {
+	background-color: none;
+	line-height: 25px;
+	width: 100%;
+	padding: 0px;
+}
+
 .cropRow {
         display: grid;
         grid-template-columns: 125px 55px 20px 55px;
@@ -237,6 +252,18 @@ input[type='radio'] {
 	border-bottom-color: #656ba3;
 }
 
+.errBox {
+	width: 100%;
+        height: 20px;
+        background: red;
+        border-style: solid;
+        border-width: 2px;
+        border-top-color: #1b2532;
+        border-left-color: #1b2532;
+        border-right-color: #656ba3;
+        border-bottom-color: #656ba3;
+}
+
 .cropBox, .scaleBox {
 	text-align: center;
 }
@@ -262,8 +289,36 @@ input[type='radio'] {
 	outline: none;
 }
 
-.queueButton {
-	margin-left: 20px;
+.dirButton, .dirButtonCh {
+	outline: none;
+	margin-top: 6px;
+}
+
+.dirButton::-webkit-file-upload-button, .dirButtonCh::-webkit-file-upload-button{
+	visibility: hidden;
+}
+
+.dirButton::before, .dirButtonCh::before {
+	content: 'Select Output Folder';
+	padding: 8px 5px;
+	background-color: #7887a9;
+        cursor: pointer;
+        color: rgba(251, 250, 244, 1);
+        text-shadow: 2px 2px 1px #1b2532;
+        font-weight: 500;
+        font-size: 10pt;
+        height: 35px;
+        border-style: solid;
+        border-width: 2px;
+        border-top-color: #1b2532;
+        border-left-color: #1b2532;
+        border-right-color: #656ba3;
+        border-bottom-color: #656ba3;
+        outline: none;
+}
+
+.dirButtonCh::before{
+	background-color: #1b2532;
 }
 
 .queueBox, .infoOut {

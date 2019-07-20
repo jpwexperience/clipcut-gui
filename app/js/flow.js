@@ -27,6 +27,7 @@ class Film {
 		this.height = height;
                 this.subtitle = subtitle;
 		this.extSubs = extSubs;
+		this.dirPath;
         }
 }
 
@@ -134,9 +135,11 @@ function showFile(clipId){
 
 function runCommand(clipId){
 	var ffError = 0;
-	$('#startBut-' + clipId).attr('disabled', true);
-	$('#startBut-' + clipId).css('background', '#1b2532');
-	$('#startBut-' + clipId).css('cursor', 'none');
+	$(document).ready(function () {
+		$('#startBut-' + clipId).attr('disabled', true);
+		$('#startBut-' + clipId).css('background', '#1b2532');
+		$('#startBut-' + clipId).css('cursor', 'none');
+	});
 	appendTxt('#clipInfo-' + clipId, '<div class="processing" id="processing-' + clipId + 
 	'"><p><b>Processing Clip, this can take a while</b>' + 
 	'<span><b>.</b></span><span><b>.</b></span><span><b>.</b></span></p></div>');
@@ -224,7 +227,7 @@ function runCommand(clipId){
 					console.log('gif generated');
 					console.log('removing temporary files');
 					var exec = require('child_process').exec, child;
-					child = exec('rm ' + tempClip.palPath + '&& rm ' + tempClip.tempClipPath,
+					child = exec('rm "' + tempClip.palPath + '" && rm "' + tempClip.tempClipPath + '"',
 					    function (error, stdout, stderr) {
 						console.log('stdout: ' + stdout);
 						console.log('stderr: ' + stderr);
@@ -246,11 +249,13 @@ function runCommand(clipId){
 
 function ffCommand(filmId, vChoice, aChoice, sChoice, start, dur, crf, extension, clipName, width, height, scale, bv, fps) {
 	var workingFilm = findFilm(filmId);
-	//console.log("vChoice: " + vChoice + " aChoice: " + aChoice + " sChoice: " + sChoice);
-	
+	if(workingFilm.dirPath !== undefined){
+		var clipPath = workingFilm.dirPath + '/' + clipName + '.' + extension;
+	} else{
+		var clipPath = path.dirname(workingFilm.filepath) + '/' + clipName + '.' + extension;
+	}
 	var commandArr = [];
 	var subtitleArr = [];
-	var clipPath = path.dirname(workingFilm.filepath) + '/' + clipName + '.' + extension;
 	
 	var fastSubReg = /.*(pgs|PGS|dvd_subtitle).*/;
 	var fastSub = 0;
@@ -278,8 +283,8 @@ function ffCommand(filmId, vChoice, aChoice, sChoice, start, dur, crf, extension
 				fastSub = 1;
 				subtitleArr.push('-filter_complex', 
 				'[0:v:' + vChoice + ']crop=' + width + ':' + height + '[c]; ' + 
-				'[0:s:' + sChoice + ']scale=' + width + ':-1' + '[sub]; ' + 
-				'[c][sub]overlay[s];' +  '[s]scale=' + scale + ':-1[v]', '-map', '[v]');
+				'[0:s:' + sChoice + ']scale=' + width + ':' + height + '[sub]; ' + 
+				'[c][sub]overlay[s];' +  ' [s]scale=' + scale + ':-1[v]', '-map', '[v]');
 			} else{
 				subtitleArr.push('-vf', 'subtitles=' + workingFilm.filepath + ':si=' + sChoice);
 			}
@@ -380,14 +385,15 @@ function emptyCheck(elem, val) {
 function formProcess(id, emptyName){
 	//console.log("Form ID: " + id);
 	var tempFilm = findFilm(id);
+	var formErr = 0;
 	
 	var vChoice = $("input[name=vStreams-" + id + "]:checked").val();
 	var aChoice = $("input[name=aStreams-" + id + "]:checked").val();
 	var sChoice = $("input[name=sStreams-" + id + "]:checked").val();
 	var extension = $("input[name=ext-" + id + "]:checked").val();
 
-	var start = emptyCheck($("#startBox-" + id).val(), "0");
-	var dur = emptyCheck($("#durBox-" + id).val(), "1:00");
+	var start = emptyCheck($("#startBox-" + id).val(), "0").replace(/\s/g, '');
+	var dur = emptyCheck($("#durBox-" + id).val(), "1:00").replace(/\s/g, '');
 	var crf = emptyCheck($("#crfBox-" + id).val(), 18);
 	var cropW = emptyCheck($("#cropBox0-" + id).val(), tempFilm.width);
 	var cropH = emptyCheck($("#cropBox1-" + id).val(), tempFilm.height);
@@ -396,31 +402,86 @@ function formProcess(id, emptyName){
 	var fps = emptyCheck($("#extraBox1-" + id).val(), '23');
 	var clipName = emptyCheck($("#nameBox-" + id).val(), emptyName); 
 
-	var finalHeight = Math.floor((scale * cropH) / cropW);
-	while(finalHeight % 2 != 0){
-		scale = parseInt(scale) + 1;
-		finalHeight = Math.floor((scale * cropH) / cropW);
+	var stampReg = /^(([1-5]?[0-9]|[0][0-9]):){1,2}(([1-5]?[0-9]|[0][0-9])(\.[0-9]+)?)$|^([0-9]+(\.[0-9]{1,3})?)$/;
+	var stampMatch = start.match(stampReg);
+	console.log(stampMatch);
+	if (stampMatch && stampMatch.length) {
+		console.log('Start Time: ' + stampMatch[0]);
+	} else {
+		formErr = 1;
+		$(document).ready(function () {
+			$('#startBox-' + id).attr('class', 'errBox');
+			$('#startBox-' + id).val('Error Reading Timestamp');
+			$('#startBox-' + id).click(function() {
+				if(this.className === 'errBox'){
+					$(this).attr('class', 'textBox');
+					$(this).val('');
+				}
+			});
+		});
 	}
-	
-	if(extension === 'gif'){
-		var newCommand = ffCommand(id, vChoice, '-1', sChoice, start, dur, crf, 
-			'mp4', 'temp-clip-' + clipCount, cropW, cropH, scale, bv, fps);
-		var tempClip = new Clip(clipCount, newCommand);
-		var gifPath = path.dirname(tempFilm.filepath) + '/' + clipName + '.gif';
-		tempClip.palPath = path.dirname(tempFilm.filepath) + '/palette-gen-' + clipCount + '.png';
-		tempClip.tempClipPath = newCommand[newCommand.length - 1];
-		tempClip.palCmd = ['-y', '-i', tempClip.tempClipPath, '-vf', 
-			'fps=23,scale=-1:-1:flags=lanczos,palettegen', tempClip.palPath];
-		tempClip.gifCmd = ['-y', '-i', tempClip.tempClipPath, '-i', tempClip.palPath, '-filter_complex',
-			'fps=23,scale=-1:-1:flags=lanczos[x];[x][1:v]paletteuse', gifPath];
-	}else {
-		var newCommand = ffCommand(id, vChoice, aChoice, sChoice, start, dur, crf, 
-			extension, clipName, cropW, cropH, scale, bv, fps);
-		var tempClip = new Clip(clipCount, newCommand);
+
+	stampMatch = dur.match(stampReg);
+	if (stampMatch && stampMatch.length) {
+		console.log('Duration: ' + stampMatch[0]);
+	} else {
+		formErr = 1;
+		$(document).ready(function () {
+			$('#durBox-' + id).attr('class', 'errBox');
+			$('#durBox-' + id).val('Error Reading Timestamp');
+			$('#durBox-' + id).click(function() {
+				if(this.className === 'errBox'){
+					$(this).attr('class', 'textBox');
+					$(this).val('');
+				}
+			});
+		});
 	}
-	clipQueue(start, dur, crf, extension, clipName, clipCount, newCommand);
-	clips.push(tempClip);
-	clipCount++;
+
+	if(formErr == 0){
+		var finalHeight = Math.floor((scale * cropH) / cropW);
+		while(finalHeight % 2 != 0){
+			scale = parseInt(scale) + 1;
+			finalHeight = Math.floor((scale * cropH) / cropW);
+		}
+		
+		if(extension === 'gif'){
+			var newCommand = ffCommand(id, vChoice, '-1', sChoice, start, dur, crf, 
+				'mp4', 'temp-clip-' + clipCount, cropW, cropH, scale, bv, fps);
+			var tempClip = new Clip(clipCount, newCommand);
+			if(tempFilm.dirPath !== null){
+				var gifPath = tempFilm.dirPath + '/' + clipName + '.gif';
+				tempClip.palPath = tempFilm.dirPath + '/palette-gen-' + clipCount + '.png';
+			
+			} else{
+				var gifPath = path.dirname(tempFilm.filepath) + '/' + clipName + '.gif';
+				tempClip.palPath = path.dirname(tempFilm.filepath) + '/palette-gen-' + clipCount + '.png';
+			}
+			tempClip.tempClipPath = newCommand[newCommand.length - 1];
+			tempClip.palCmd = ['-y', '-i', tempClip.tempClipPath, '-vf', 
+				'fps=23,scale=-1:-1:flags=lanczos,palettegen', tempClip.palPath];
+			tempClip.gifCmd = ['-y', '-i', tempClip.tempClipPath, '-i', tempClip.palPath, '-filter_complex',
+				'fps=23,scale=-1:-1:flags=lanczos[x];[x][1:v]paletteuse', gifPath];
+		}else {
+			var newCommand = ffCommand(id, vChoice, aChoice, sChoice, start, dur, crf, 
+				extension, clipName, cropW, cropH, scale, bv, fps);
+			var tempClip = new Clip(clipCount, newCommand);
+		}
+		clipQueue(start, dur, crf, extension, clipName, clipCount, newCommand);
+		clips.push(tempClip);
+		clipCount++;
+	}
+}
+
+function filmDir(id){
+	var tempFilm = findFilm(id);
+	var dirBut = document.getElementById('outDir-' + id);
+	if ('files' in dirBut) {
+	 	tempFilm.dirPath = dirBut.files[0].path;
+	}
+	$(document).ready(function () {
+		$('#outDir-' + id).attr('class', 'dirButtonCh');
+	});
 }
 
 function filmForm(film){
@@ -594,13 +655,19 @@ function filmForm(film){
 	'" placeholder="23" value="23" min="0">');
 	appendTxt('#gifInfo-' + id, '<br>');
 
+	appendTxt("#form-" + id, '<input id="outDir-' + id + '" type="file" webkitdirectory="true" class="dirButton" ' + 
+	'onchange="filmDir(' + id + ')"></input>');
+	appendTxt('#form-' + id, '<br><br>');
+	
 	//submit buttons
-	appendTxt('#form-' + id, '<div class="formRow" id="filmBut-' + id + '"></div>');
-	appendTxt('#filmBut-' + id, '<div class="formColumn" id="submitCol-' + id +'"></div>');
-	appendTxt('#filmBut-' + id, '<div class="formColumn" id="removeCol-' + id +'"></div>');
+	appendTxt('#form-' + id, '<div class="formButRow" id="filmBut-' + id + '"></div>');
+	appendTxt('#filmBut-' + id, '<div class="formButCol" id="submitCol-' + id +'"></div>');
+	appendTxt('#filmBut-' + id, '<div class="formButCol" id="removeCol-' + id +'"></div>');
 	
 	appendTxt("#submitCol-" + id, '<button id="submit-' + id + '" type="button" class="button" ' + 
-	'onclick="formProcess(' + id + ', \'' + nameHolder + '\')">Add Clip to Queue</button>');
+	'onclick="formProcess(' + id + ', \'' + nameHolder + '\')">Add to Queue</button>');
+
+
 
 	appendTxt('#removeCol-' + id, '<button class="queueButton" type="button" ' +
 	'onclick="removeFilm(' + id + ', \'#inputDiv-' + id + '\')">Remove Video</button>');
