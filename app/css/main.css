@@ -352,6 +352,14 @@ input[type='radio'] {
 	font-size: 10pt;
 }
 
+.crf {
+	width: 100%;
+}
+
+.crfSlider {
+	width: 100%; 
+}
+
 .infoOut {
 	background-color: black;
 	color: white;

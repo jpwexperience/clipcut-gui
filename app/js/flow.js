@@ -570,13 +570,19 @@ function filmForm(film){
 	
 
 	//crf value
+	/*
 	appendTxt("#form-" + id, '<div class="formRow" id="crfRow-' + id + '"></div>');
 	appendTxt("#crfRow-" + id, '<div class="formColumn" id="crfCol-' + id + '"></div>');
 	appendTxt("#crfCol-" + id, "<b>Quality Level:</b>");
 	appendTxt("#crfRow-" + id, '<div class="formColumn" id="crfColEntry-' + id + '"></div>');
 	appendTxt("#crfColEntry-" + id, '<input type="number" class="textBox" id="crfBox-' + id + 
 	'" placeholder="lower # = higher quality" value="18" min="0" max="32">');
-	
+	*/
+
+	appendTxt('#form-' + id, '<b>Quality Level:</b> Lower Number = Higher Quality. 18-32 is the sane range.<br>');
+	appendTxt('#form-' + id, '<div class="crf" id="crf-' + id + '"></div>');
+	appendTxt('#crf-' + id, '<input type="range" min="1" max="50" value="18" class="crfSlider" id="crfBox-' + id + '">');
+
 	appendTxt("#form-" + id, "<br>");
 	
 	//crop
