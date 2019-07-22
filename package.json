@@ -37,11 +37,21 @@
   },
   "config": {
     "forge": {
-	    "make_targets": {
-	    "win32": ["squirrel", "zip"], 
-	    "darwin": ["zip", "dmg"], 
-	    "linux": ["deb", "rpm", "zip"] 
-  },
+      "make_targets": {
+        "win32": [
+          "squirrel",
+          "zip"
+        ],
+        "darwin": [
+          "zip",
+          "dmg"
+        ],
+        "linux": [
+          "deb",
+          "rpm",
+          "zip"
+        ]
+      },
       "electronPackagerConfig": {
         "packageManager": "npm"
       },

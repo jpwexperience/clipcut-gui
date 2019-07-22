@@ -617,6 +617,7 @@ function filmForm(film){
 	//clip name
 	appendTxt("#form-" + id, "<b>Enter Clip Name:</b>");
 	appendTxt("#form-" + id, "<br>");
+	//need to sanitize this input
 	var nameHolder = path.basename(film.filepath).replace(/\.[^/.]+$/, "") + "-cut";
 	appendTxt("#form-" + id, '<input type="text" id="nameBox-' + id + '" placeholder="' + nameHolder + '" class="clipTextBox">');
 	appendTxt("#form-" + id, "<br>");
@@ -734,14 +735,24 @@ function streamProcess(results, filepath) {
 		} else if (aReg.test(streams[i])){
 			var tempReg = /Stream #\d+:\d+\(/;
 			var pieces = streams[i].split(tempReg);
-			var pieces = pieces[1].split(/\): Audio:/);
-			var outStream = '<b>' + pieces[0] + '</b>: ' + pieces[1];
+			if(pieces.length < 2){
+				var pieces = pieces[0].split(/Audio:/);
+				var outStream = '<b>Undefinded</b>: ' + pieces[1];
+			} else{
+				var pieces = pieces[1].split(/\): Audio:/);
+				var outStream = '<b>' + pieces[0] + '</b>: ' + pieces[1];
+			}
 			aStreams.push(outStream);
 		} else if (sReg.test(streams[i])){
 			var tempReg = /Stream #\d+:\d+\(/;
 			var pieces = streams[i].split(tempReg);
-			var pieces = pieces[1].split(/\): Subtitle:/);
-			var outStream = '<b>' + pieces[0] + '</b>: ' + pieces[1];
+			if(pieces.length < 2){
+				var pieces = pieces[0].split(/Subtitle:/);
+				var outStream = '<b>Undefinded</b>: ' + pieces[1];
+			} else{
+				var pieces = pieces[1].split(/\): Subtitle:/);
+				var outStream = '<b>' + pieces[0] + '</b>: ' + pieces[1];
+			}
 			sStreams.push(outStream);
 		} else {;}
 	}
