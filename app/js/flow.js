@@ -836,4 +836,5 @@ function fileUp() {
 		var tempPath = filePaths[i];
 		ffprobe(tempPath);
         }
+        x = '';
 }
