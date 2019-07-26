@@ -473,6 +473,11 @@ function formProcess(id, emptyName){
 	}
 }
 
+function getStyleSheet() {
+	var sheet = document.styleSheets[0];
+	return sheet;
+}
+
 function filmDir(id){
 	var tempFilm = findFilm(id);
 	var dirBut = document.getElementById('outDir-' + id);
@@ -481,6 +486,8 @@ function filmDir(id){
 	}
 	$(document).ready(function () {
 		$('#outDir-' + id).attr('class', 'dirButtonCh');
+		$('#outDirBox-' + id).css('display', 'inline');
+		$('#outDirCon-' + id).html(tempFilm.dirPath);
 	});
 }
 
@@ -672,9 +679,17 @@ function filmForm(film){
 	'" placeholder="23" value="23" min="0">');
 	appendTxt('#gifInfo-' + id, '<br>');
 
-	appendTxt("#form-" + id, '<input id="outDir-' + id + '" type="file" webkitdirectory="true" class="dirButton" ' + 
+	appendTxt('#form-' + id, '<div class="outRow" id="outRow-' + id + '"></div>');
+	appendTxt('#outRow-' + id, '<div class="outCol" id="outCol0-' + id + '"></div>');
+	appendTxt('#outRow-' + id, '<div class="outCol" id="outCol1-' + id + '"></div>');
+	appendTxt("#outCol0-" + id, '<input id="outDir-' + id + '" type="file" webkitdirectory="true" class="dirButton" ' + 
 	'onchange="filmDir(' + id + ')"></input>');
-	appendTxt('#form-' + id, '<br><br>');
+
+	appendTxt('#outCol1-' + id, '<div class="outDirBox" id="outDirBox-' + id + '"></div>');
+	appendTxt('#outDirBox-' + id, 
+		'<b class="outDirCon" id="outDirCon-' + id + '"></b>');
+
+	appendTxt('#form-' + id, '<br>');
 	
 	//submit buttons
 	appendTxt('#form-' + id, '<div class="formButRow" id="filmBut-' + id + '"></div>');
