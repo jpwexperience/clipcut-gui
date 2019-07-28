@@ -140,7 +140,7 @@ input[type='radio'] {
 
 .outRow {
 	display: grid;
-	grid-template-columns: 150px 100px;
+	grid-template-columns: 150px 50%;
 	object-fit: cover;
 	text-align: left;
 	grid-gap: 20px;
@@ -149,7 +149,6 @@ input[type='radio'] {
 .outCol {
 	background-color: none;
 	line-height: 25px;
-	width: 280px;
 	padding: 0px;
 	word-wrap: break-word;
 }
@@ -273,6 +272,8 @@ input[type='radio'] {
 }
 
 .outDirBox {
+	width: 95%;
+	margin-top: -5px;
 	display: none;	
 	overflow: auto;
 	white-space: nowrap;
@@ -385,45 +386,21 @@ input[type='radio'] {
 	padding-top: 10px;
 }
 
-.crfSlider {
-  -webkit-appearance: none;
-  width: 100%;
-  height: 25px;
-  background: #d3d3d3;
-  outline: none;
-  opacity: 0.7;
-  -webkit-transition: .2s;
-  transition: opacity .2s;
+.jqSlide {
+	width: 3em;
+	height: 1.6em;
+	top: 50%;
+	margin-top: -.8em;
+	text-align: center;
+	line-height: 1.6em;
 }
 
-.crfSlider:hover {
-  opacity: 1;
-}
-
-.crfSlider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 25px;
-  height: 25px;
-  background: #4CAF50;
-  cursor: pointer;
-}
-
-.crfSlider::-moz-range-thumb {
-  width: 25px;
-  height: 25px;
-  background: #4CAF50;
-  cursor: pointer;
-}
-.crfSlider::-moz-range-track {
-  padding: 0 10px;
-  background: repeating-linear-gradient(to right,
-    #ccc,
-    #ccc 10%,
-    #000 10%,
-    #000 11%,
-    #ccc 11%,
-    #ccc 20%);
+.ui-slider {
+	background: #7887a9;
+	border-top-color: #1b2532;
+	border-left-color: #1b2532;
+	border-right-color: #656ba3;
+	border-bottom-color: #656ba3;
 }
 
 .infoOut {

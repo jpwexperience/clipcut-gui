@@ -383,33 +383,33 @@ function emptyCheck(elem, val) {
 }
 
 function formProcess(id, emptyName){
-	//console.log("Form ID: " + id);
-	var tempFilm = findFilm(id);
-	var formErr = 0;
-	
-	var vChoice = $("input[name=vStreams-" + id + "]:checked").val();
-	var aChoice = $("input[name=aStreams-" + id + "]:checked").val();
-	var sChoice = $("input[name=sStreams-" + id + "]:checked").val();
-	var extension = $("input[name=ext-" + id + "]:checked").val();
+	$(document).ready(function () {
+		//console.log("Form ID: " + id);
+		var tempFilm = findFilm(id);
+		var formErr = 0;
+		
+		var vChoice = $("input[name=vStreams-" + id + "]:checked").val();
+		var aChoice = $("input[name=aStreams-" + id + "]:checked").val();
+		var sChoice = $("input[name=sStreams-" + id + "]:checked").val();
+		var extension = $("input[name=ext-" + id + "]:checked").val();
 
-	var start = emptyCheck($("#startBox-" + id).val(), "0").replace(/\s/g, '');
-	var dur = emptyCheck($("#durBox-" + id).val(), "1:00").replace(/\s/g, '');
-	var crf = emptyCheck($("#crfBox-" + id).val(), 18);
-	var cropW = emptyCheck($("#cropBox0-" + id).val(), tempFilm.width);
-	var cropH = emptyCheck($("#cropBox1-" + id).val(), tempFilm.height);
-	var scale = emptyCheck($("#scaleBox-" + id).val(), cropW);
-	var bv = emptyCheck($("#extraBox0-" + id).val(), '0.35');
-	var fps = emptyCheck($("#extraBox1-" + id).val(), '23');
-	var clipName = emptyCheck($("#nameBox-" + id).val(), emptyName); 
+		var start = emptyCheck($("#startBox-" + id).val(), "0").replace(/\s/g, '');
+		var dur = emptyCheck($("#durBox-" + id).val(), "1:00").replace(/\s/g, '');
+		var crf = emptyCheck($("#jqCrf-" + id).slider("value"), 18);
+		var cropW = emptyCheck($("#cropBox0-" + id).val(), tempFilm.width);
+		var cropH = emptyCheck($("#cropBox1-" + id).val(), tempFilm.height);
+		var scale = emptyCheck($("#scaleBox-" + id).val(), cropW);
+		var bv = emptyCheck($("#extraBox0-" + id).val(), '0.35');
+		var fps = emptyCheck($("#extraBox1-" + id).val(), '23');
+		var clipName = emptyCheck($("#nameBox-" + id).val(), emptyName); 
 
-	var stampReg = /^(([1-5]?[0-9]|[0][0-9]):){1,2}(([1-5]?[0-9]|[0][0-9])(\.[0-9]+)?)$|^([0-9]+(\.[0-9]{1,3})?)$/;
-	var stampMatch = start.match(stampReg);
-	console.log(stampMatch);
-	if (stampMatch && stampMatch.length) {
-		console.log('Start Time: ' + stampMatch[0]);
-	} else {
-		formErr = 1;
-		$(document).ready(function () {
+		var stampReg = /^(([1-5]?[0-9]|[0][0-9]):){1,2}(([1-5]?[0-9]|[0][0-9])(\.[0-9]+)?)$|^([0-9]+(\.[0-9]{1,3})?)$/;
+		var stampMatch = start.match(stampReg);
+		console.log(stampMatch);
+		if (stampMatch && stampMatch.length) {
+			console.log('Start Time: ' + stampMatch[0]);
+		} else {
+			formErr = 1;
 			$('#startBox-' + id).attr('class', 'errBox');
 			$('#startBox-' + id).val('Error Reading Timestamp');
 			$('#startBox-' + id).click(function() {
@@ -418,15 +418,13 @@ function formProcess(id, emptyName){
 					$(this).val('');
 				}
 			});
-		});
-	}
+		}
 
-	stampMatch = dur.match(stampReg);
-	if (stampMatch && stampMatch.length) {
-		console.log('Duration: ' + stampMatch[0]);
-	} else {
-		formErr = 1;
-		$(document).ready(function () {
+		stampMatch = dur.match(stampReg);
+		if (stampMatch && stampMatch.length) {
+			console.log('Duration: ' + stampMatch[0]);
+		} else {
+			formErr = 1;
 			$('#durBox-' + id).attr('class', 'errBox');
 			$('#durBox-' + id).val('Error Reading Timestamp');
 			$('#durBox-' + id).click(function() {
@@ -435,42 +433,42 @@ function formProcess(id, emptyName){
 					$(this).val('');
 				}
 			});
-		});
-	}
+		}
 
-	if(formErr == 0){
-		var finalHeight = Math.floor((scale * cropH) / cropW);
-		while(finalHeight % 2 != 0){
-			scale = parseInt(scale) + 1;
-			finalHeight = Math.floor((scale * cropH) / cropW);
-		}
-		
-		if(extension === 'gif'){
-			var newCommand = ffCommand(id, vChoice, '-1', sChoice, start, dur, crf, 
-				'mp4', 'temp-clip-' + clipCount, cropW, cropH, scale, bv, fps);
-			var tempClip = new Clip(clipCount, newCommand);
-			if(tempFilm.dirPath !== null){
-				var gifPath = tempFilm.dirPath + '/' + clipName + '.gif';
-				tempClip.palPath = tempFilm.dirPath + '/palette-gen-' + clipCount + '.png';
-			
-			} else{
-				var gifPath = path.dirname(tempFilm.filepath) + '/' + clipName + '.gif';
-				tempClip.palPath = path.dirname(tempFilm.filepath) + '/palette-gen-' + clipCount + '.png';
+		if(formErr == 0){
+			var finalHeight = Math.floor((scale * cropH) / cropW);
+			while(finalHeight % 2 != 0){
+				scale = parseInt(scale) + 1;
+				finalHeight = Math.floor((scale * cropH) / cropW);
 			}
-			tempClip.tempClipPath = newCommand[newCommand.length - 1];
-			tempClip.palCmd = ['-y', '-i', tempClip.tempClipPath, '-vf', 
-				'fps=23,scale=-1:-1:flags=lanczos,palettegen', tempClip.palPath];
-			tempClip.gifCmd = ['-y', '-i', tempClip.tempClipPath, '-i', tempClip.palPath, '-filter_complex',
-				'fps=23,scale=-1:-1:flags=lanczos[x];[x][1:v]paletteuse', gifPath];
-		}else {
-			var newCommand = ffCommand(id, vChoice, aChoice, sChoice, start, dur, crf, 
-				extension, clipName, cropW, cropH, scale, bv, fps);
-			var tempClip = new Clip(clipCount, newCommand);
+			
+			if(extension === 'gif'){
+				var newCommand = ffCommand(id, vChoice, '-1', sChoice, start, dur, crf, 
+					'mp4', 'temp-clip-' + clipCount, cropW, cropH, scale, bv, fps);
+				var tempClip = new Clip(clipCount, newCommand);
+				if(tempFilm.dirPath !== null){
+					var gifPath = tempFilm.dirPath + '/' + clipName + '.gif';
+					tempClip.palPath = tempFilm.dirPath + '/palette-gen-' + clipCount + '.png';
+				
+				} else{
+					var gifPath = path.dirname(tempFilm.filepath) + '/' + clipName + '.gif';
+					tempClip.palPath = path.dirname(tempFilm.filepath) + '/palette-gen-' + clipCount + '.png';
+				}
+				tempClip.tempClipPath = newCommand[newCommand.length - 1];
+				tempClip.palCmd = ['-y', '-i', tempClip.tempClipPath, '-vf', 
+					'fps=23,scale=-1:-1:flags=lanczos,palettegen', tempClip.palPath];
+				tempClip.gifCmd = ['-y', '-i', tempClip.tempClipPath, '-i', tempClip.palPath, '-filter_complex',
+					'fps=23,scale=-1:-1:flags=lanczos[x];[x][1:v]paletteuse', gifPath];
+			}else {
+				var newCommand = ffCommand(id, vChoice, aChoice, sChoice, start, dur, crf, 
+					extension, clipName, cropW, cropH, scale, bv, fps);
+				var tempClip = new Clip(clipCount, newCommand);
+			}
+			clipQueue(start, dur, crf, extension, clipName, clipCount, newCommand);
+			clips.push(tempClip);
+			clipCount++;
 		}
-		clipQueue(start, dur, crf, extension, clipName, clipCount, newCommand);
-		clips.push(tempClip);
-		clipCount++;
-	}
+	});
 }
 
 function getStyleSheet() {
@@ -486,7 +484,7 @@ function filmDir(id){
 	}
 	$(document).ready(function () {
 		$('#outDir-' + id).attr('class', 'dirButtonCh');
-		$('#outDirBox-' + id).css('display', 'inline');
+		$('#outDirBox-' + id).css('display', 'grid');
 		$('#outDirCon-' + id).html(tempFilm.dirPath);
 	});
 }
@@ -587,19 +585,9 @@ function filmForm(film){
 	*/
 
 	appendTxt('#form-' + id, '<b>Quality Level:</b> Lower Number = Higher Quality. 18-32 is the sane range.<br>');
-	appendTxt('#form-' + id, '<div class="crf" id="crf-' + id + '"></div>');
-	appendTxt('#crf-' + id, '<input type="range" min="1" max="50" value="18" class="crfSlider" id="crfBox-' + id + 
-		'" list="crfTicks-' + id + '" step="1">');
-	appendTxt('#crf-' + id, '<datalist id="crfTicks-' + id + '">');
-	for(var i = 0; i < 50; i ++){
-		if(i == 18){
-			appendTxt('#crfTicks-' + id, '<option value="' + i + '" label="' + i + '">18</option>');
-		} else{
-			appendTxt('#crfTicks-' + id, '<option value="' + i + '">');
-		}
-	}
-	appendTxt('crfTicks-' + id, '</datalist>');
-
+	appendTxt("#form-" + id, "<br>");
+	appendTxt('#form-' + id, '<div id="jqCrf-' + id + '" class="jqCrf"></div>');
+	appendTxt('#jqCrf-' + id, '<div id="jqSlide-' + id + '" class="ui-slider-handle"></div>');
 	appendTxt("#form-" + id, "<br>");
 	
 	//crop
@@ -624,7 +612,7 @@ function filmForm(film){
 	//scale
 	appendTxt('#form-' + id, '<div class="scaleRow" id="scaleRow-' + id + '"></div>'); 
 	appendTxt('#scaleRow-' + id, '<div class="scaleCol" id="scaleCol0-' + id + '"></div>'); 
-	appendTxt('#scaleCol0-' + id, '<b>Scale: </b>');
+	appendTxt('#scaleCol0-' + id, '<b>Scale Width: </b>');
 
 	appendTxt('#scaleRow-' + id, '<div class="scaleCol" id="scaleCol1-' + id + '"></div>'); 
 	appendTxt("#scaleCol1-" + id, '<input type="number" class="scaleBox" id="scaleBox-' + id + 
@@ -690,19 +678,6 @@ function filmForm(film){
 		'<b class="outDirCon" id="outDirCon-' + id + '"></b>');
 
 	appendTxt('#form-' + id, '<br>');
-	
-	//submit buttons
-	appendTxt('#form-' + id, '<div class="formButRow" id="filmBut-' + id + '"></div>');
-	appendTxt('#filmBut-' + id, '<div class="formButCol" id="submitCol-' + id +'"></div>');
-	appendTxt('#filmBut-' + id, '<div class="formButCol" id="removeCol-' + id +'"></div>');
-	
-	appendTxt("#submitCol-" + id, '<button id="submit-' + id + '" type="button" class="button" ' + 
-	'onclick="formProcess(' + id + ', \'' + nameHolder + '\')">Add to Queue</button>');
-
-
-
-	appendTxt('#removeCol-' + id, '<button class="queueButton" type="button" ' +
-	'onclick="removeFilm(' + id + ', \'#inputDiv-' + id + '\')">Remove Video</button>');
 
 	$(document).ready(function () {
 		$('input:radio[name="ext-' + id + '"]').change(function() {
@@ -723,7 +698,32 @@ function filmForm(film){
 			}
 			$('#scaleBox-' + id).attr({'max' : $(this).val()});
 		});
+		var handle = $( '#jqSlide-' + id );
+		$( '#jqCrf-' + id ).slider({
+			value: 18,
+			min: 1,
+			max: 99,
+			create: function() {
+				handle.text( $( this ).slider( "value" ) );
+			},
+				slide: function( event, ui ) {
+				handle.text( ui.value );
+			}
+		});
 	});
+	
+	//submit buttons
+	appendTxt('#form-' + id, '<div class="formButRow" id="filmBut-' + id + '"></div>');
+	appendTxt('#filmBut-' + id, '<div class="formButCol" id="submitCol-' + id +'"></div>');
+	appendTxt('#filmBut-' + id, '<div class="formButCol" id="removeCol-' + id +'"></div>');
+	
+	appendTxt("#submitCol-" + id, '<button id="submit-' + id + '" type="button" class="button" ' + 
+	'onclick="formProcess(' + id + ', \'' + nameHolder + '\')">Add to Queue</button>');
+
+
+
+	appendTxt('#removeCol-' + id, '<button class="queueButton" type="button" ' +
+	'onclick="removeFilm(' + id + ', \'#inputDiv-' + id + '\')">Remove Video</button>');
 
 }
 
