@@ -436,12 +436,11 @@ function formProcess(id, emptyName){
 		}
 
 		if(formErr == 0){
-			var finalHeight = Math.floor((scale * cropH) / cropW);
+			var finalHeight = Math.round((scale * cropH) / cropW);
 			while(finalHeight % 2 != 0){
 				scale = parseInt(scale) + 1;
-				finalHeight = Math.floor((scale * cropH) / cropW);
+				finalHeight = Math.round((scale * cropH) / cropW);
 			}
-			
 			if(extension === 'gif'){
 				var newCommand = ffCommand(id, vChoice, '-1', sChoice, start, dur, crf, 
 					'mp4', 'temp-clip-' + clipCount, cropW, cropH, scale, bv, fps);
