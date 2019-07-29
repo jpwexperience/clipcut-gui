@@ -28,6 +28,7 @@ class Film {
                 this.subtitle = subtitle;
 		this.extSubs = extSubs;
 		this.dirPath;
+		this.nameHolder;
         }
 }
 
@@ -394,11 +395,12 @@ function emptyCheck(elem, val) {
         }
 }
 
-function formProcess(id, emptyName){
+function formProcess(id){
 	$(document).ready(function () {
 		//console.log("Form ID: " + id);
 		var tempFilm = findFilm(id);
 		var formErr = 0;
+		var emptyName = tempFilm.nameHolder;
 		
 		var vChoice = $("input[name=vStreams-" + id + "]:checked").val();
 		var aChoice = $("input[name=aStreams-" + id + "]:checked").val();
@@ -633,8 +635,8 @@ function filmForm(film){
 	//clip name
 	appendTxt("#form-" + id, "<b>Enter Clip Name:</b>");
 	appendTxt("#form-" + id, "<br>");
-	//need to sanitize this input
 	var nameHolder = path.basename(film.filepath).replace(/\.[^/.]+$/, "") + "-cut";
+	film.nameHolder = nameHolder;
 	appendTxt("#form-" + id, '<input type="text" id="nameBox-' + id + '" placeholder="' + nameHolder + '" class="clipTextBox">');
 	appendTxt("#form-" + id, "<br>");
 	appendTxt("#form-" + id, "<br>");
@@ -729,7 +731,7 @@ function filmForm(film){
 	appendTxt('#filmBut-' + id, '<div class="formButCol" id="removeCol-' + id +'"></div>');
 	
 	appendTxt("#submitCol-" + id, '<button id="submit-' + id + '" type="button" class="button" ' + 
-	'onclick="formProcess(' + id + ', \'' + nameHolder + '\')">Add to Queue</button>');
+	'onclick="formProcess(' + id + ')">Add to Queue</button>');
 
 
 
