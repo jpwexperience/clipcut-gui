@@ -19,8 +19,12 @@ Getting Started:
 
 Distributables: <a href="https://clipcut.jpwexperience.com" target="_blank">clipcut.jpwexperience.com</a>
 
-User Input Options:<br />
+Input Options:<br />
 Clip Start: Timecode (00:00:00.00) or number of seconds of when the clip should start<br />
 Clip Duration: Length of the clip in timecode or seconds<br />
-Quality Level: The crf value when encoding with x264. The lower the number, the higher the quality. Sane range is 18-32.<br />
+Quality Level: The crf value when encoding with x264. The lower the number, the higher the quality. Sane range is 18-32 but can go beyond for higher/lower filesizes. May be useful to lower the number when burning subtitles depending on the source.<br />
 Clip Name: The name of the newly generated clip. Currently the clip will be generated within the directory of the source video.<br />
+Crop: Width and Height of the output video in pixels.<br />
+Scale: Width of output video in pixels. Final video height will be scaled accordingly. If final video height is an odd number, pixels will eb added until it is even due to ffmpeg's usage.<br />
+FPS: Frames per second of output gif<br />
+Bitrate: Bitrate of output webm in MB<br />
