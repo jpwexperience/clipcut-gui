@@ -70,16 +70,27 @@ function clearHtml(elemId) {
 
 //Removes html within an element
 function removeClip(clipId, elemId) {
-	var tempClip = findClip(clipId);
-        $("div").remove(elemId);
-	clips.splice(clips.indexOf(tempClip), 1);
+	$(document).ready(function () {
+		var tempClip = findClip(clipId);
+		$("div").remove(elemId);
+		clips.splice(clips.indexOf(tempClip), 1);
+	});
+}
+
+//Removes html div
+function removeDiv(elemId) {
+	$(document).ready(function () {
+		$("div").remove(elemId);
+	});
 }
 
 //Removes html within an element
 function removeFilm(filmId, elemId) {
-	var tempFilm = findFilm(filmId);
-        $("div").remove(elemId);
-	films.splice(films.indexOf(tempFilm), 1);
+	$(document).ready(function () {
+		var tempFilm = findFilm(filmId);
+		$("div").remove(elemId);
+		films.splice(films.indexOf(tempFilm), 1);
+	});
 }
 
 function totalDur(time){
@@ -172,7 +183,7 @@ function runCommand(clipId){
 				$('#progBar-' + clipId).css('width', '100%');
 				$('#progBar-' + clipId).html('Error Cutting Clip.');
 			}
-
+				removeDiv('#processing-' + clipId);
 		});
 
 		ffCmd.on('error', (err) => {
@@ -235,6 +246,7 @@ function runCommand(clipId){
 						     console.log('exec error: ' + error);
 						}
 					    });
+					removeDiv('#processing-' + clipId);
 				});
 			});
                 });
