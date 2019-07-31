@@ -452,14 +452,18 @@ function formProcess(id){
 		if(formErr == 0){
 			var finalHeight = Math.round((scale * cropH) / cropW);
 			while(finalHeight % 2 != 0){
-				scale = parseInt(scale) + 1;
+				if (scale % 2 == 0){
+					scale = parseInt(scale) + 2;
+				} else{
+					scale = parseInt(scale) + 1;
+				}
 				finalHeight = Math.round((scale * cropH) / cropW);
 			}
 			if(extension === 'gif'){
 				var newCommand = ffCommand(id, vChoice, '-1', sChoice, start, dur, crf, 
 					'mp4', 'temp-clip-' + clipCount, cropW, cropH, scale, bv, fps);
 				var tempClip = new Clip(clipCount, newCommand);
-				if(tempFilm.dirPath !== null){
+				if(tempFilm.dirPath !== undefined){
 					var gifPath = tempFilm.dirPath + '/' + clipName + '.gif';
 					tempClip.palPath = tempFilm.dirPath + '/palette-gen-' + clipCount + '.png';
 				
@@ -472,6 +476,8 @@ function formProcess(id){
 					'fps=23,scale=-1:-1:flags=lanczos,palettegen', tempClip.palPath];
 				tempClip.gifCmd = ['-y', '-i', tempClip.tempClipPath, '-i', tempClip.palPath, '-filter_complex',
 					'fps=23,scale=-1:-1:flags=lanczos[x];[x][1:v]paletteuse', gifPath];
+				console.log(tempClip.palCmd);
+				console.log(tempClip.gifCmd);
 			}else {
 				var newCommand = ffCommand(id, vChoice, aChoice, sChoice, start, dur, crf, 
 					extension, clipName, cropW, cropH, scale, bv, fps);
