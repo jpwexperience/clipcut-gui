@@ -1,6 +1,6 @@
 {
   "name": "ClipCut",
-  "version": "1.0.0",
+  "version": "1.5.0",
   "description": "GUI program to aid in cutting clips from video files.",
   "main": "app/main.js",
   "scripts": {
