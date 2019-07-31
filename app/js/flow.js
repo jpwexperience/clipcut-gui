@@ -772,9 +772,11 @@ function streamProcess(results, filepath) {
 			var pieces = streams[i].split(tempReg);
 			var sizePieces = streams[i].match(sizeReg);
 			var sizePieces = sizePieces[0].split('x');
-			height = sizePieces[1];
-			var widthCut = sizePieces[0].split(', ');
-			width = widthCut[1];
+			if(vStreams.length == 0){
+				height = sizePieces[1];
+				var widthCut = sizePieces[0].split(', ');
+				width = widthCut[1];
+			}
 			vStreams.push(pieces[1]);
 		} else if (aReg.test(streams[i])){
 			var tempReg = /Stream #\d+:\d+\(/;
