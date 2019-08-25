@@ -17,7 +17,4 @@ function createWindow () {
 }
 
 app.on('ready', createWindow)
-window.addEventListener('beforeunload', ()=>{
-  globalShortcut.unregister('F5', reload);
-  globalShortcut.unregister('CommandOrControl+R', reload);
-})
+
