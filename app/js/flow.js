@@ -141,7 +141,6 @@ function progUpdate(line, clipId, duration){
 function showFile(clipId){
 	var clip = findClip(clipId);
 	var path = clip.command[clip.command.length - 1];
-	//console.log(path);
 	shell.showItemInFolder(path);
 }
 
@@ -370,7 +369,20 @@ function ffCommand(filmId, vChoice, aChoice, sChoice, start, dur, crf, extension
 	return commandArr
 }
 
-function clipQueue(start, dur, crf, extension, clipName, clipCount, command){
+function cmdTog(id, count){
+	$(document).ready(function () {
+		if ($(id).css('display') == 'none'){
+			$('#showBut-' + count).html('Hide Command');
+			$(id).css('display', 'block')
+		} else {
+			$('#showBut-' + count).html('Show Command');
+			$(id).css('display', 'none')
+		}
+	});
+}
+
+function clipQueue(extension, clipName, clipCount){
+	var tempClip = findClip(clipCount);
 	appendTxt('.clipQueue', '<div class="queueBox" id="clip-' + clipCount + '"></div>');
 	appendTxt('#clip-' + clipCount, '<div class="clipInfo" id="clipInfo-' + clipCount + '">');	
 	appendTxt('#clipInfo-' + clipCount, '<p><b>Clip Name: ' + clipName + '.' + extension + '</b><p>');
@@ -382,10 +394,17 @@ function clipQueue(start, dur, crf, extension, clipName, clipCount, command){
 	appendTxt('#queueButCol-0-' + clipCount, '<button class="queueButton" id="startBut-' + clipCount + 
 	'" type="button" ' + 'onclick="runCommand(' + clipCount + ')">Start Cutting</button>');
 	appendTxt('#queueButCol-1-' + clipCount, '<button class="queueButton" id="showBut-' + clipCount + 
-	'" type="button" ' + 'onclick="console.log(\'ayylmao\')">Show Command</button>');
+	'" type="button" ' + 'onclick="cmdTog(' + '\'#ffCmd-' + clipCount + '\', ' + clipCount + ')">Show Command</button>');
 	appendTxt('#queueButCol-2-' + clipCount, '<button class="queueButton" type="button" ' +
 	'onclick="removeClip(' + clipCount + ', \'#clip-' + clipCount + '\')">Remove Clip</button>');
-
+	if (extension === 'gif'){
+		appendTxt('#clip-' + clipCount, '<div class="ffCmd" id="ffCmd-' + clipCount + '"><pre>ffmpeg ' + ' ' + 
+			tempClip.command.join(' ') + '\nffmpeg ' + 
+			tempClip.palCmd.join(' ') + '\nffmpeg ' +
+			tempClip.gifCmd.join(' ') + '</pre></div>');
+	} else{
+		appendTxt('#clip-' + clipCount, '<div class="ffCmd" id="ffCmd-' + clipCount + '"><pre>ffmpeg ' + ' ' + tempClip.command.join(' ') + '</pre></div>');
+	}
 }
 
 //elem: some object
@@ -495,8 +514,8 @@ function formProcess(id){
 					extension, clipName, cropW, cropH, scale, bv, fps);
 				var tempClip = new Clip(clipCount, newCommand);
 			}
-			clipQueue(start, dur, crf, extension, clipName, clipCount, newCommand);
 			clips.push(tempClip);
+			clipQueue(extension, clipName, clipCount);
 			clipCount++;
 		}
 	});
@@ -606,15 +625,6 @@ function filmForm(film){
 	
 
 	//crf value
-	/*
-	appendTxt("#form-" + id, '<div class="formRow" id="crfRow-' + id + '"></div>');
-	appendTxt("#crfRow-" + id, '<div class="formColumn" id="crfCol-' + id + '"></div>');
-	appendTxt("#crfCol-" + id, "<b>Quality Level:</b>");
-	appendTxt("#crfRow-" + id, '<div class="formColumn" id="crfColEntry-' + id + '"></div>');
-	appendTxt("#crfColEntry-" + id, '<input type="number" class="textBox" id="crfBox-' + id + 
-	'" placeholder="lower # = higher quality" value="18" min="0" max="32">');
-	*/
-
 	appendTxt('#form-' + id, '<b>Quality Level:</b> Lower Number = Higher Quality. 18-32 is the sane range.<br>');
 	appendTxt("#form-" + id, "<br>");
 	appendTxt('#form-' + id, '<div id="jqCrf-' + id + '" class="jqCrf"></div>');
@@ -847,6 +857,15 @@ function ffprobe(filepath) {
 	});
 }
 
+function clearAll(){
+	filePaths = [];
+	films = [];
+	clips = [];
+	filmCount = 0;
+	clipCount = 0;
+	clearHtml('.clipForm');
+	clearHtml('.clipQueue');
+}
 
 //Processes input files from button
 function fileUp() {

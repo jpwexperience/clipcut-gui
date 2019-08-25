@@ -15,7 +15,14 @@
 		<div class="main"></div>
 		<div class="row">
 			<div class="column">
-				<input class="inFiles" type="File" id="upFile" multiple size="50" onchange="fileUp()">
+				<div class="topButRow" id="topButRow">
+					<div class="topButCol" id="topButCol-0">
+						<input class="inFiles" type="File" id="upFile" multiple size="50" onchange="fileUp()">
+					</div>
+					<div class="topButCol" id="topButCol-1">
+						<button type="button" class="clearBut" id="clearBut" onclick="clearAll()" />
+					</div>
+				</div>
 				<div class="clipForm"></div>
 			</div>
 			<div class="column">

@@ -3,8 +3,8 @@ const { app, BrowserWindow } = require('electron')
 function createWindow () {
   // Create the browser window.
   let win = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 1000,
+    height: 700,
     minWidth: 550,
     minHeight: 300,	
     webPreferences: {
@@ -17,4 +17,7 @@ function createWindow () {
 }
 
 app.on('ready', createWindow)
-
+window.addEventListener('beforeunload', ()=>{
+  globalShortcut.unregister('F5', reload);
+  globalShortcut.unregister('CommandOrControl+R', reload);
+})
