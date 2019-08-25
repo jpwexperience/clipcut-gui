@@ -162,8 +162,6 @@ function runCommand(clipId){
 	var duration = command[command.findIndex(element => element === '-t') + 1];
 	var durSec = totalDur(duration);
 
-	//console.log(command);
-
 	if(tempClip.palCmd === undefined){
 		const ffCmd = spawn(ffpath, command);
 		ffCmd.stderr.on('data', (data) => {
@@ -176,11 +174,13 @@ function runCommand(clipId){
 			$('button').remove('#startBut-' + clipId);
 			$('p').remove('#processing-' + clipId);
 			if (ffError == 0){
+				$('#progBar-' + clipId).css('width', '100%');
 				$('#progBar-' + clipId).html('Clip Cut Complete.');
 				appendTxt('#queueCol-1-' + clipId, '<br>');
 				appendTxt('#queueButCol-0-' + clipId, '<button class="queueButton" id="openFile-' + clipId + 
 			'" type="button" ' + 'onclick="showFile(' + clipId + ')">Show Clip in Folder</button>');
 			} else {
+				console.log('FFerror: ' + ffError);
 				$('#progBar-' + clipId).css('width', '100%');
 				$('#progBar-' + clipId).html('Error Cutting Clip.');
 			}
@@ -206,6 +206,7 @@ function runCommand(clipId){
 			clearHtml('#processing-' + clipId);
 			appendTxt('#processing-' + clipId, '<p><b>Generating Gif Palette</b>' + 
 				'<span><b>.</b></span><span><b>.</b></span><span><b>.</b></span></p>');
+			$('#progBar-' + clipId).html('n/a');
 			const palGen = spawn(ffpath, tempClip.palCmd);
 			palGen.stderr.on('data', (data) => {
 				console.log(`${data}`);
@@ -226,6 +227,7 @@ function runCommand(clipId){
 					$('button').remove('#startBut-' + clipId);
 					$('p').remove('#processing-' + clipId);
 					if (ffError == 0){
+						$('#progBar-' + clipId).css('width', '100%');
 						$('#progBar-' + clipId).html('Clip Cut Complete.');
 						$('#progBar-' + clipId).css('width', '100%');
 						appendTxt('#queueCol-1-' + clipId, '<br>');
@@ -376,10 +378,13 @@ function clipQueue(start, dur, crf, extension, clipName, clipCount, command){
 	appendTxt('#queueButtons-' + clipCount, '<div class="queueRow" id="queueButRow-' + clipCount + '"></div>');
 	appendTxt('#queueButRow-' + clipCount, '<div class="queuecol" id="queueButCol-0-' + clipCount + '"></div>');
 	appendTxt('#queueButRow-' + clipCount, '<div class="queuecol" id="queueButCol-1-' + clipCount + '"></div>');
+	appendTxt('#queueButRow-' + clipCount, '<div class="queuecol" id="queueButCol-2-' + clipCount + '"></div>');
 	appendTxt('#queueButCol-0-' + clipCount, '<button class="queueButton" id="startBut-' + clipCount + 
-	'" type="button" ' + 'onclick="runCommand(' + clipCount + ')">Start Cutting Clip</button>');
-	appendTxt('#queueButCol-1-' + clipCount, '<button class="queueButton" type="button" ' +
-	'onclick="removeClip(' + clipCount + ', \'#clip-' + clipCount + '\')">Remove from Queue</button>');
+	'" type="button" ' + 'onclick="runCommand(' + clipCount + ')">Start Cutting</button>');
+	appendTxt('#queueButCol-1-' + clipCount, '<button class="queueButton" id="showBut-' + clipCount + 
+	'" type="button" ' + 'onclick="console.log(\'ayylmao\')">Show Command</button>');
+	appendTxt('#queueButCol-2-' + clipCount, '<button class="queueButton" type="button" ' +
+	'onclick="removeClip(' + clipCount + ', \'#clip-' + clipCount + '\')">Remove Clip</button>');
 
 }
 
@@ -450,8 +455,15 @@ function formProcess(id){
 		}
 
 		if(formErr == 0){
+			if (cropW % 2 != 0){
+				cropW++;
+			}
+			if (cropH % 2 != 0){
+				cropH++;
+			}
 			var finalHeight = Math.round((scale * cropH) / cropW);
 			while(finalHeight % 2 != 0){
+				//console.log('Width: ' + cropW + ' Height: ' + cropH + ' Scale W: ' + scale + ' Adjusted Height: ' + finalHeight);
 				if (scale % 2 == 0){
 					scale = parseInt(scale) + 2;
 				} else{
@@ -616,14 +628,14 @@ function filmForm(film){
 
 	appendTxt('#cropRow-' + id, '<div class="cropCol" id="cropCol1-' + id + '"></div>');	
 	appendTxt("#cropCol1-" + id, '<input type="number" class="cropBox" id="cropBox0-' + id + 
-	'" placeholder="' + film.width + '" value="' + film.width + '" min="1" max="' + film.width + '">');
+	'" placeholder="' + film.width + '" value="' + film.width + '" step="2" min="2" max="' + film.width + '">');
 	
 	appendTxt('#cropRow-' + id, '<div class="cropCol" id="cropCol2-' + id + '"></div>');	
 	appendTxt('#cropCol2-' + id, '<div style="text-align: center;"><b> x </b></div>');
 	
 	appendTxt('#cropRow-' + id, '<div class="cropCol" id="cropCol3-' + id + '"></div>');	
 	appendTxt("#cropCol3-" + id, '<input type="number" class="cropBox" id="cropBox1-' + id + 
-	'" placeholder="' + film.height + '" value="' + film.height + '" min="1" max="' + film.height + '">');
+	'" placeholder="' + film.height + '" value="' + film.height + '" step="2" min="2" max="' + film.height + '">');
 	
 	appendTxt("#form-" + id, "<br>");
 
@@ -635,7 +647,7 @@ function filmForm(film){
 
 	appendTxt('#scaleRow-' + id, '<div class="scaleCol" id="scaleCol1-' + id + '"></div>'); 
 	appendTxt("#scaleCol1-" + id, '<input type="number" class="scaleBox" id="scaleBox-' + id + 
-	'" placeholder="' + film.width + '" value="' + film.width + '" min="1" max="' + film.width + '">');
+	'" placeholder="' + film.width + '" value="' + film.width + '" step="2" min="2" max="' + film.width + '">');
 	appendTxt('#form-' + id, '<br>');
 
 	//clip name
