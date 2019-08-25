@@ -65,6 +65,7 @@ input[type='radio'] {
 .inFiles, .clearBut {
 	outline: none;
 	padding: 0px;
+	border: none;
 }
 
 .inFiles::-webkit-file-upload-button {
