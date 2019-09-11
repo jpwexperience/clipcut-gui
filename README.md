@@ -7,6 +7,7 @@ An electron application that allows easier cutting of clips and burning subtitle
 Allows you to select the video, audio, and subtitle stream to create the clip with. 
 
 Currently all clips are encoded with x264 and AAC for video and audio respectively. 
+	Messing around with bitrates for social posts and am currently trying out 128kbs.
 
 External subtitles are searched for in the video file firectory.
 

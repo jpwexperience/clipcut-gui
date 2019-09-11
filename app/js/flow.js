@@ -318,7 +318,7 @@ function ffCommand(filmId, vChoice, aChoice, sChoice, start, dur, crf, extension
 			} else{
 				commandArr.push('-ss', start, '-i', workingFilm.filepath, '-t', dur);
 				commandArr = commandArr.concat(subtitleArr);
-				commandArr.push('-map', '0:a:' + aChoice, '-c:v', vcodec, '-c:a', acodec);
+				commandArr.push('-map', '0:a:' + aChoice, '-c:v', vcodec, '-c:a', acodec, '-b:a', '128k');
 				if (extension === 'webm'){
 					commandArr.push('-b:v', bv + 'M');
 				}	
@@ -339,7 +339,7 @@ function ffCommand(filmId, vChoice, aChoice, sChoice, start, dur, crf, extension
 				'-t', dur, '-map', '0:v:' + vChoice); 
 				commandArr = commandArr.concat(subtitleArr);
 				commandArr.push('-map', '0:a:' + aChoice, '-c:v', vcodec, 
-				'-c:a', acodec);
+				'-c:a', acodec, '-b:a', '128k');
 				if (extension === 'webm'){
 					commandArr.push('-b:v', bv + 'M');
 				}
@@ -358,7 +358,7 @@ function ffCommand(filmId, vChoice, aChoice, sChoice, start, dur, crf, extension
 		} else{
 			commandArr.push('-ss', start, '-i', workingFilm.filepath, '-t', dur, 
 			'-map', '0:v:' + vChoice, '-vf', 'crop=' + width + ':' + height + 
-			', scale=' + scale + ':-1', '-map', '0:a:' + aChoice, '-c:v', vcodec, '-c:a', acodec);
+			', scale=' + scale + ':-1', '-map', '0:a:' + aChoice, '-c:v', vcodec, '-c:a', acodec, '-b:a', '128k');
 			if (extension === 'webm'){
 				commandArr.push('-b:v', bv + 'M');
 			}
