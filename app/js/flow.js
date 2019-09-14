@@ -10,6 +10,7 @@ var clips = [];
 var filmCount = 0;
 var clipCount = 0;
 
+//Stream information from input video and respective metadata
 class Stream {
 	constructor(streams, meta){
 		this.streams = streams;
@@ -17,6 +18,7 @@ class Stream {
 	}
 }
 
+//Holds stream information for uploaded videos
 class Film {
         constructor(id, filepath, video, audio, subtitle, extSubs, width, height) {
                 this.id = id;
@@ -32,6 +34,7 @@ class Film {
         }
 }
 
+//Holds ffmpeg information for cutting clips
 class Clip {
 	constructor(id, command) {
 		this.id = id;
@@ -43,21 +46,26 @@ class Clip {
 	}
 }
 
+//Appends text to given html element
 function appendTxt(name, txt){
 	$(document).ready(function () {
 		$(name).append(txt);
 	});
 }
+
+//Checks the value of radio buttons
 function radioCheck(name, val){
 	$(document).ready(function () {
 		$(name).prop("checked", true);
 	});
 }
 
+//Returns film given a film id
 function findFilm(filmId){
 	return films.find(Film => Film.id == filmId);
 }
 
+//Returns clip given a clip id
 function findClip(clipId){
 	return clips.find(Clip => Clip.id == clipId);
 }
@@ -94,6 +102,7 @@ function removeFilm(filmId, elemId) {
 	});
 }
 
+//Converts timecode input to seconds
 function totalDur(time){
 	//console.log('time: ' + time);
 	var durArr = time.split(':');
@@ -116,6 +125,7 @@ function totalDur(time){
 	}
 }
 
+//Updates progress bar from given ffmpeg output
 function progUpdate(line, clipId, duration){
 	var timeRegex = /time=[0-9][0-9]:[0-9][0-9]:[0-9][0-9][.][0-9]*/; 
 	var failRegex = /Conversion failed!/;
@@ -138,12 +148,14 @@ function progUpdate(line, clipId, duration){
 	return 0;
 }
 
+//Opens clip source directory using default file browser
 function showFile(clipId){
 	var clip = findClip(clipId);
 	var path = clip.command[clip.command.length - 1];
 	shell.showItemInFolder(path);
 }
 
+//Given a clip id, runs the ffmpeg command(s) for given clip
 function runCommand(clipId){
 	var ffError = 0;
 	$(document).ready(function () {
@@ -261,6 +273,7 @@ function runCommand(clipId){
 
 }
 
+//Returns ffmpeg command array generated from form input
 function ffCommand(filmId, vChoice, aChoice, sChoice, start, dur, crf, extension, clipName, width, height, scale, bv, fps) {
 	var workingFilm = findFilm(filmId);
 	if(workingFilm.dirPath !== undefined){
@@ -369,6 +382,7 @@ function ffCommand(filmId, vChoice, aChoice, sChoice, start, dur, crf, extension
 	return commandArr
 }
 
+//Toggles the display of the generated ffmpeg command
 function cmdTog(id, count){
 	$(document).ready(function () {
 		if ($(id).css('display') == 'none'){
@@ -381,6 +395,7 @@ function cmdTog(id, count){
 	});
 }
 
+//Generates html elements for creating a clip
 function clipQueue(extension, clipName, clipCount){
 	var tempClip = findClip(clipCount);
 	appendTxt('.clipQueue', '<div class="queueBox" id="clip-' + clipCount + '"></div>');
@@ -419,6 +434,7 @@ function emptyCheck(elem, val) {
         }
 }
 
+//Processes user input on video file form
 function formProcess(id){
 	$(document).ready(function () {
 		//console.log("Form ID: " + id);
@@ -521,11 +537,13 @@ function formProcess(id){
 	});
 }
 
+//Gets first stylesheet
 function getStyleSheet() {
 	var sheet = document.styleSheets[0];
 	return sheet;
 }
 
+//Displays chosen output directory for clips
 function filmDir(id){
 	var tempFilm = findFilm(id);
 	var dirBut = document.getElementById('outDir-' + id);
@@ -539,6 +557,7 @@ function filmDir(id){
 	});
 }
 
+//Creates user input form given a film object
 function filmForm(film){
 	var id = film.id;
 	appendTxt(".clipForm", '<div id="inputDiv-' + id +'" class="inputDiv"><br></div>');
@@ -720,6 +739,7 @@ function filmForm(film){
 
 	appendTxt('#form-' + id, '<br>');
 
+	//Functionality for form buttons
 	$(document).ready(function () {
 		$('input:radio[name="ext-' + id + '"]').change(function() {
 			if ($(this).val() == 'webm') {
@@ -768,7 +788,7 @@ function filmForm(film){
 
 }
 
-//Parse out video, audio, and subtitle streams
+//Parse out video, audio, and subtitle streams from given input file
 function streamProcess(results, filepath) {
 	var streams = [];
 	var vStreams = [];
@@ -842,6 +862,7 @@ function streamProcess(results, filepath) {
 }
 
 //Get ffmpeg information from video file
+//Could modify probe size on this, analyze_reduction and what not
 function ffprobe(filepath) {
 	var command = '"' + ffpath + '" -hide_banner -i "' + filepath + '"';
 	var exec = require('child_process').exec, child;
@@ -855,16 +876,6 @@ function ffprobe(filepath) {
 		//send ffmpeg output to parse streams
 		streamProcess(stderr, filepath);
 	});
-}
-
-function clearAll(){
-	filePaths = [];
-	films = [];
-	clips = [];
-	filmCount = 0;
-	clipCount = 0;
-	clearHtml('.clipForm');
-	clearHtml('.clipQueue');
 }
 
 //Processes input files from button
@@ -904,4 +915,10 @@ function fileUp() {
 		ffprobe(tempPath);
         }
         x = '';
+}
+
+//Used to restart application
+function refreshApp(){
+	var remote = require('electron').remote;
+	remote.getCurrentWindow().reload();
 }
