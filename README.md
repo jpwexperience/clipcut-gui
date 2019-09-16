@@ -1,6 +1,6 @@
 # Clip Cut Gui
 
-<img src="https://clipcut.jpwexperience.com/images/clipcut-screenshot-1.5.jpg">
+<img src="https://clipcut.jpwexperience.com/images/clipcut-screenshot-1.6.jpg">
 
 An electron application that allows easier cutting of clips and burning subtitles from movies.
 
