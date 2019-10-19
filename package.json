@@ -36,7 +36,8 @@
     "jquery-ui-dist": "^1.12.1",
     "query-string": "^6.8.1",
     "rpmbuild": "0.0.22",
-    "video.js": "^7.5.5"
+    "video.js": "^7.5.5",
+    "wcjs-player": "^6.0.1"
   },
   "config": {
     "forge": {
