@@ -922,3 +922,12 @@ function refreshApp(){
 	var remote = require('electron').remote;
 	remote.getCurrentWindow().reload();
 }
+
+//Testing video player functionality
+var wjs = require("wcjs-player");
+var conf = {
+	autoplay: true,
+	wcjs: require('wcjs-prebuilt')
+};
+var player = new wjs("#player").addPlayer(conf);
+player.addPlaylist("http://archive.org/download/CartoonClassics/Krazy_Kat_-_Keeping_Up_With_Krazy.mp4");	
