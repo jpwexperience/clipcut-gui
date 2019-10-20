@@ -303,8 +303,8 @@ function ffCommand(filmId, vChoice, aChoice, sChoice, start, dur, crf, extension
 		if (sChoice >= workingFilm.subtitle.length){
 			var extSubInd = sChoice - workingFilm.subtitle.length;	
 			var extSubPath = workingFilm.extSubs[extSubInd];
-			subtitleArr.push('-vf', 'crop=' + width + ':' + height + ', subtitles=' + extSubPath +
-			', scale=' + scale + ':-1');
+			subtitleArr.push('-vf', 'crop=' + width + ':' + height + ', subtitles=\'' + 
+			extSubPath + '\'' + ', scale=' + scale + ':-1');
 		} else {
 			if (fastSubReg.test(workingFilm.subtitle[sChoice])){
 				fastSub = 1;
