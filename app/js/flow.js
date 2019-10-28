@@ -131,11 +131,15 @@ function playVid(id) {
 	var path = tempFilm.filepath;
 
 	var projPath = __dirname;
-	var sPath = projPath + '/js/mpv.js';
+	var sPath = projPath + '/lua/stamps.lua';
 	console.log('Project Path: ' + sPath);
 
 	const mpvPlay = spawn('mpv', ['--script=' + sPath, path]);
 	mpvPlay.stderr.on('data', (data) => {
+		console.log(`${data}`);
+	});
+
+	mpvPlay.stdout.on('data', (data) => {
 		console.log(`${data}`);
 	});
 
