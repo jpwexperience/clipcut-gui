@@ -1,5 +1,12 @@
-function get_stamp() {
-	spot = mp.get_property_number("time-pos");
-	console.log(spot);
+function on_pause_change(name, value) {
+    if (value == true)
+        mp.set_property("fullscreen", "no");
 }
-mp.add_key_binding("X", "get_stamp", get_stamp);
+
+function get_time() {
+	var spot = mp.get_property_number("time-pos");
+}
+
+mp.observe_property("pause", "bool", on_pause_change);
+
+mp.add_key_binding("R", 'Timestamp', get_time())

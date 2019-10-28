@@ -144,9 +144,9 @@ input[type='radio'] {
 
 .topButRow {
 	display: grid;
-	grid-template-columns: 200px 200px;
+	grid-template-columns: 1fr 1fr;
 	object-fit: cover;
-	text-align: left;
+	text-align: center;
 }
 
 .topButCol {

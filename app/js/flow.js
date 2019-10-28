@@ -125,6 +125,29 @@ function totalDur(time){
 	}
 }
 
+//Testing video player functionality
+function playVid(id) {
+	var tempFilm = findFilm(id);
+	var path = tempFilm.filepath;
+
+	var projPath = __dirname;
+	var sPath = projPath + '/js/mpv.js';
+	console.log('Project Path: ' + sPath);
+
+	const mpvPlay = spawn('mpv', ['--script=' + sPath, path]);
+	mpvPlay.stderr.on('data', (data) => {
+		console.log(`${data}`);
+	});
+
+	mpvPlay.on('close', (code) => {
+		console.log('mpv has been closed');
+	});
+
+	mpvPlay.on('error', (err) => {
+		console.log('MPV Err: ' + err);
+	});
+}
+
 //Updates progress bar from given ffmpeg output
 function progUpdate(line, clipId, duration){
 	var timeRegex = /time=[0-9][0-9]:[0-9][0-9]:[0-9][0-9][.][0-9]*/; 
@@ -777,14 +800,16 @@ function filmForm(film){
 	appendTxt('#form-' + id, '<div class="formButRow" id="filmBut-' + id + '"></div>');
 	appendTxt('#filmBut-' + id, '<div class="formButCol" id="submitCol-' + id +'"></div>');
 	appendTxt('#filmBut-' + id, '<div class="formButCol" id="removeCol-' + id +'"></div>');
+	appendTxt('#filmBut-' + id, '<div class="formButCol" id="playCol-' + id +'"></div>');
 	
 	appendTxt("#submitCol-" + id, '<button id="submit-' + id + '" type="button" class="button" ' + 
 	'onclick="formProcess(' + id + ')">Add to Queue</button>');
 
-
-
 	appendTxt('#removeCol-' + id, '<button class="queueButton" type="button" ' +
 	'onclick="removeFilm(' + id + ', \'#inputDiv-' + id + '\')">Remove Video</button>');
+
+	appendTxt('#playCol-' + id, '<button class="queueButton" type="button" ' +
+	'onclick="playVid(' + id + ')">Play Video</button>');
 
 }
 
@@ -923,19 +948,3 @@ function refreshApp(){
 	remote.getCurrentWindow().reload();
 }
 
-//Testing video player functionality
-function playVid() {
-	const mpvPlay = spawn('mpv', ['/media/evo1tb/Film/thirst_for_love.mkv']);
-	mpvPlay.stderr.on('data', (data) => {
-		console.log('playVid, ayy lmao');
-	});
-
-	mpvPlay.on('close', (code) => {
-		console.log('mpv has been closed');
-	});
-
-	mpvPlay.on('error', (err) => {
-		console.log('MPV Err: ' + err);
-	});
-}
-playVid();

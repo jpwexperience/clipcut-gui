@@ -13,18 +13,19 @@
 		<title>Clip / Cut</title>
 	</head>
 	<body>
+		<div class="topButRow" id="topButRow">
+			<div class="topButCol" id="topButCol-0">
+				<input class="inFiles" type="File" id="upFile" multiple size="50" onchange="fileUp()">
+			</div>
+			<div class="topButCol" id="topButCol-1">
+				<button type="button" class="clearBut" id="clearBut" onclick="refreshApp()" />
+			</div>
+		</div>
 		<div class="player" id="player"><div></div></div>
 		<div class="main"></div>
 		<div class="row">
 			<div class="column">
-				<div class="topButRow" id="topButRow">
-					<div class="topButCol" id="topButCol-0">
-						<input class="inFiles" type="File" id="upFile" multiple size="50" onchange="fileUp()">
-					</div>
-					<div class="topButCol" id="topButCol-1">
-						<button type="button" class="clearBut" id="clearBut" onclick="refreshApp()" />
-					</div>
-				</div>
+				<h3 class="title">Video Queue</h3>
 				<div class="clipForm"></div>
 			</div>
 			<div class="column">
