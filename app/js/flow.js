@@ -135,9 +135,11 @@ function playVid(id) {
 	console.log('Project Path: ' + sPath);
 
 	const mpvPlay = spawn('mpv', ['--script=' + sPath, path]);
+	/*
 	mpvPlay.stderr.on('data', (data) => {
 		console.log(`${data}`);
 	});
+	*/
 
 	mpvPlay.stdout.on('data', (data) => {
 		console.log(`${data}`);
