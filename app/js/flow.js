@@ -924,10 +924,18 @@ function refreshApp(){
 }
 
 //Testing video player functionality
-var wjs = require("wcjs-player");
-var conf = {
-	autoplay: true,
-	wcjs: require('wcjs-prebuilt')
-};
-var player = new wjs("#player").addPlayer(conf);
-player.addPlaylist("http://archive.org/download/CartoonClassics/Krazy_Kat_-_Keeping_Up_With_Krazy.mp4");	
+function playVid() {
+	const mpvPlay = spawn('mpv', ['/media/evo1tb/Film/thirst_for_love.mkv']);
+	mpvPlay.stderr.on('data', (data) => {
+		console.log('playVid, ayy lmao');
+	});
+
+	mpvPlay.on('close', (code) => {
+		console.log('mpv has been closed');
+	});
+
+	mpvPlay.on('error', (err) => {
+		console.log('MPV Err: ' + err);
+	});
+}
+playVid();
