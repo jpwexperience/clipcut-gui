@@ -125,6 +125,10 @@ function totalDur(time){
 	}
 }
 
+function getStamp(line) {
+	console.log(line.toString());
+}
+
 //Testing video player functionality
 function playVid(id) {
 	var tempFilm = findFilm(id);
@@ -134,12 +138,15 @@ function playVid(id) {
 	var sPath = projPath + '/lua/stamps.lua';
 	console.log('Project Path: ' + sPath);
 
-	const mpvPlay = spawn('mpv', ['--script=' + sPath, path]);
-	/*
+	const mpvPlay = spawn('mpv', ['--osd-fractions',
+		'--script=' + sPath, 
+		path]);
+	
 	mpvPlay.stderr.on('data', (data) => {
-		console.log(`${data}`);
+		//console.log(`${data}`);
+		getStamp(data);
 	});
-	*/
+	
 
 	mpvPlay.stdout.on('data', (data) => {
 		console.log(`${data}`);
