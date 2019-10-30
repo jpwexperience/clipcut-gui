@@ -147,6 +147,16 @@ input[type='radio'] {
 	grid-template-columns: 1fr 1fr;
 	object-fit: cover;
 	text-align: center;
+	background-color: #7887a9;
+	border: 1px solid #1b2532;
+	border-style: solid;
+	border-width: 5px;
+	border-top-color: #1b2532;
+	border-left-color: #1b2532;
+	border-right-color: #656ba3;
+	border-bottom-color: #656ba3;
+	padding-top: 15px;
+	margin: 0px 10px 15px 10px;
 }
 
 .topButCol {
