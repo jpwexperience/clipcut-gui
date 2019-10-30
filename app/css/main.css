@@ -8,10 +8,6 @@ body {
 	color: #1b2532;
 }
 
-h1 {
-	text-align: center;
-}
-
 input {
 	color: rgba(251, 250, 244, 1);
 	outline: none;
@@ -46,7 +42,6 @@ input[type='radio'] {
 	color: rgba(251, 250, 244, 1);
 	text-shadow: 2px 2px 1px #1b2532;
 	font-weight: 700;
-	padding: 8px 0px;
 	font-size: 16pt;
 	margin-top: 0px;
 }

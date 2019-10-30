@@ -19,6 +19,8 @@ class Stream {
 }
 
 //Holds stream information for uploaded videos
+//Stamps holds information about start and end timestamp of video
+//	[0] - Start; [1] - Duration
 class Film {
         constructor(id, filepath, video, audio, subtitle, extSubs, width, height) {
                 this.id = id;
@@ -31,6 +33,8 @@ class Film {
 		this.extSubs = extSubs;
 		this.dirPath;
 		this.nameHolder;
+		this.playing = 0; //value updated as video plays
+		this.stamps = [0, 0];
         }
 }
 
@@ -106,6 +110,11 @@ function removeFilm(filmId, elemId) {
 function totalDur(time){
 	//console.log('time: ' + time);
 	var durArr = time.split(':');
+	var milliString = time.split('.');
+	var milli = 0;
+	if (typeof milliString[1] != 'undefined'){
+		milli = parseInt(milliString[1].substring(0, 3)) * 0.001;
+	}
 	var len = durArr.length;
 	var durNum = [];
 	//console.log(durArr);
@@ -114,44 +123,58 @@ function totalDur(time){
 	}
 	//hours first, then minutes, then seconds
 	if(len == 1){
-		return Math.floor(durNum[0]);
+		//return Math.floor(durNum[0]);
+		return durNum[0] + milli;
 	} else if(len == 2){
-		return Math.floor(durNum[1] + (60 * durNum[0]));	
+		//return Math.floor(durNum[1] + (60 * durNum[0]));	
+		return durNum[1] + (60 * durNum[0]) + milli;	
 	} else if(len == 3){
-		return Math.floor(durNum[2] + (60 * durNum[1]) + (3600 * durNum[0]));	
+		//return Math.floor(durNum[2] + (60 * durNum[1]) + (3600 * durNum[0]));	
+		return durNum[2] + (60 * durNum[1]) + (3600 * durNum[0]) + milli;	
 	} else{
 		console.log('Too many things. Default to 1:00');
 		return 60;
 	}
 }
 
-function getStamp(line) {
-	console.log(line.toString());
+function getStamp(line, film) {
+	var spaceSplit = line.split(' ');
+	var totSeconds = totalDur(spaceSplit[1]);
+	console.log(' Timecode: ' + spaceSplit[1] + ' Seconds: ' + totSeconds);
+	if (totSeconds.toString() != 'NaN'){
+		film.playing = totSeconds;
+	}
 }
 
-//Testing video player functionality
+function setStamp(id, opt) {
+	var tempFilm = findFilm(id);
+	if (opt == 's'){
+		tempFilm.stamps[0] = tempFilm.playing;
+		$('#startBox-' + id).val(tempFilm.playing);
+	} else{
+		var duration = (tempFilm.playing - tempFilm.stamps[0]).toFixed(3);
+		if (tempFilm.stamps[0] > tempFilm.playing){
+			duration = duration * -1;
+			tempFilm.stamps[1] = duration;
+			tempFilm.stamps[0] = tempFilm.playing
+		} else {
+			tempFilm.stamps[1] = duration;
+		}
+		$('#durBox-' + id).val(tempFilm.stamps[1]);
+	}
+	console.log('Current: ' + tempFilm.playing + ' Start: ' + tempFilm.stamps[0] + ' End: ' + tempFilm.stamps[1])
+}
+
 function playVid(id) {
 	var tempFilm = findFilm(id);
 	var path = tempFilm.filepath;
 
-	var projPath = __dirname;
-	var sPath = projPath + '/lua/stamps.lua';
-	console.log('Project Path: ' + sPath);
-
-	const mpvPlay = spawn('mpv', ['--osd-fractions',
-		'--script=' + sPath, 
-		path]);
+	const mpvPlay = spawn('mpv', ['--osd-fractions', path]);
 	
 	mpvPlay.stderr.on('data', (data) => {
-		//console.log(`${data}`);
-		getStamp(data);
+		getStamp(data.toString(), tempFilm);
 	});
 	
-
-	mpvPlay.stdout.on('data', (data) => {
-		console.log(`${data}`);
-	});
-
 	mpvPlay.on('close', (code) => {
 		console.log('mpv has been closed');
 	});
@@ -823,6 +846,10 @@ function filmForm(film){
 
 	appendTxt('#playCol-' + id, '<button class="queueButton" type="button" ' +
 	'onclick="playVid(' + id + ')">Play Video</button>');
+	appendTxt('#playCol-' + id, '<button class="queueButton" type="button" ' +
+	'onclick="setStamp(' + id + ', \'s\')">grab start</button>');
+	appendTxt('#playCol-' + id, '<button class="queueButton" type="button" ' +
+	'onclick="setStamp(' + id + ', \'d\')">grab end</button>');
 
 }
 
