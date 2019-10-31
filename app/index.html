@@ -13,15 +13,17 @@
 		<title>Clip / Cut</title>
 	</head>
 	<body>
-
 		<div class="main"></div>
-		<div class="mainButtons" id="mainButtons">
-			<div class="topButCol" id="topButCol-0">
-				<input class="inFiles" type="File" id="upFile" multiple size="50" onchange="fileUp()">
+		<div class="vidController" id="vidController">
+			<div class="mainButtons" id="mainButtons">
+				<div class="topButCol" id="topButCol-0">
+					<input class="inFiles" type="File" id="upFile" multiple size="50" onchange="fileUp()">
+				</div>
+				<div class="topButCol" id="topButCol-1">
+					<button type="button" class="clearBut" id="clearBut" onclick="refreshApp()" />
+				</div>
 			</div>
-			<div class="topButCol" id="topButCol-1">
-				<button type="button" class="clearBut" id="clearBut" onclick="refreshApp()" />
-			</div>
+			<div class="currentVid" id="currentVid"></div>
 		</div>
 		<div class="row">
 			<div class="column">

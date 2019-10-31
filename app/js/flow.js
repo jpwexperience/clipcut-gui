@@ -9,6 +9,7 @@ var films = [];
 var clips = [];
 var filmCount = 0;
 var clipCount = 0;
+var controllerId = 0;
 
 //Stream information from input video and respective metadata
 class Stream {
@@ -616,10 +617,32 @@ function filmDir(id){
 	});
 }
 
+function shortForm(film){
+	var id = film.id;
+	appendTxt(".videoQueue", '<div id="video-' + id +'" class="video"></div>');
+	appendTxt("#video-" + id, '<div class="vTitle" id="vTitle-' + id + '"></div>');
+	appendTxt("#vTitle-" + id, "<b>Filename: " + path.basename(film.filepath) + "</b><br><br>"); 
+
+	//submit buttons
+	appendTxt('#video-' + id, '<div class="formButRow" id="filmBut-' + id + '"></div>');
+	appendTxt('#filmBut-' + id, '<div class="formButCol" id="submitCol-' + id +'"></div>');
+	appendTxt('#filmBut-' + id, '<div class="formButCol" id="removeCol-' + id +'"></div>');
+	appendTxt('#filmBut-' + id, '<div class="formButCol" id="playCol-' + id +'"></div>');
+	
+	appendTxt("#submitCol-" + id, '<button id="submit-' + id + 
+	'" type="button" class="button" ' + 'onclick="setController(' + 
+	id + ')">Set Clip Options</button>');
+
+	appendTxt('#removeCol-' + id, '<button class="queueButton" type="button" ' +
+	'onclick="removeFilm(' + id + ', \'#video-' + id + '\')">Remove Video</button>');
+
+}
+
 //Creates user input form given a film object
 function filmForm(film){
 	var id = film.id;
-	appendTxt(".videoQueue", '<div id="video-' + id +'" class="video"></div>');
+	appendTxt("#currentVid", '<div id="video-' + id +'" class="video"></div>');
+	//appendTxt(".videoQueue", '<div id="video-' + id +'" class="video"></div>');
 	appendTxt("#video-" + id, '<div class="vTitle" id="vTitle-' + id + '"></div>');
 	appendTxt("#vTitle-" + id, "<b>Filename: " + path.basename(film.filepath) + "</b><br><br>"); 
 	appendTxt("#video-" + id, '<div class="streams" id="streams-' + id + '"></div>');
@@ -859,6 +882,16 @@ function filmForm(film){
 
 }
 
+function setController(id){
+	var currentController = findFilm(controllerId);
+	var tempFilm = findFilm(id);
+	controllerId = id;
+	clearHtml('#currentVid');
+	removeDiv('#video-' + id);
+	filmForm(tempFilm);
+	shortForm(currentController);
+}
+
 //Parse out video, audio, and subtitle streams from given input file
 function streamProcess(results, filepath) {
 	var streams = [];
@@ -928,8 +961,13 @@ function streamProcess(results, filepath) {
 	var newFilm = new Film(filmCount, filepath, vStreams, aStreams, sStreams, extSubs, width, height)
 	films.push(newFilm);
 	filmCount++;
+
 	//create html form from video input
-	filmForm(newFilm);
+	if (films.length == 1){
+		filmForm(newFilm);
+	} else {
+		shortForm(newFilm);
+	}
 }
 
 //Get ffmpeg information from video file
