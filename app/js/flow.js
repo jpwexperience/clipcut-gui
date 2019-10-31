@@ -596,10 +596,9 @@ function getMpvEvent(line, film) {
 	if (line.match(createReg)){
 		var clipId = clipCount;
 		formProcess(id);
-		runCommand(clipId);
-
+		setTimeout(function(){ runCommand(clipId); }, 100);
+		//runCommand(clipId);
 	}
-	//console.log(line);
 }
 
 //Opens MPV and plays selected video file
