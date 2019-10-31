@@ -673,10 +673,15 @@ function shortForm(film){
 function filmForm(film){
 	var id = film.id;
 	appendTxt("#currentVid", '<div id="video-' + id +'" class="video"></div>');
-	//appendTxt(".videoQueue", '<div id="video-' + id +'" class="video"></div>');
 	appendTxt("#video-" + id, '<div class="vTitle" id="vTitle-' + id + '"></div>');
+
+	appendTxt("#video-" + id, '<div class="row0" id="row0-' + id + '"></div>');
+	appendTxt("#row0-" + id, '<div class="col0" id="col0-' + id + '"></div>');
+	appendTxt("#row0-" + id, '<div class="col1" id="col1-' + id + '"></div>');
+
+
 	appendTxt("#vTitle-" + id, "<b>Filename: " + path.basename(film.filepath) + "</b><br><br>"); 
-	appendTxt("#video-" + id, '<div class="streams" id="streams-' + id + '"></div>');
+	appendTxt("#col0-" + id, '<div class="streams" id="streams-' + id + '"></div>');
 
 	//Video Choice
 	if (film.video.length == 0){
@@ -738,7 +743,7 @@ function filmForm(film){
 	}
 	appendTxt("#streams-" + id, "<br>");
 
-	appendTxt("#video-" + id, '<div class="times" id="times-' + id + '"></div>');
+	appendTxt("#col1-" + id, '<div class="times" id="times-' + id + '"></div>');
 	//start time
 	appendTxt("#times-" + id, '<div class="formRow" id="startRow-' + id + '"></div>');
 	appendTxt("#startRow-" + id, '<div class="formColumn" id="startCol-' + id + '"></div>');
@@ -748,6 +753,7 @@ function filmForm(film){
 	id + '" placeholder="00:00:00.00">');
 	
 	appendTxt("#times-" + id, "<br>");
+
 	
 	//duration
 	appendTxt("#times-" + id, '<div class="formRow" id="durRow-' + id + '"></div>');
@@ -756,10 +762,14 @@ function filmForm(film){
 	appendTxt("#durRow-" + id, '<div class="formColumn" id="durColEntry-' + id + '"></div>');
 	appendTxt("#durColEntry-" + id, '<input type="text" class="textBox" id="durBox-' + id + '" placeholder="1:00">');
 	appendTxt("#times-" + id, "<br>");
+	appendTxt('#times-' + id, '<button class="queueButton" type="button" ' +
+	'onclick="setStamp(' + id + ', \'s\')">grab start</button>');
+	appendTxt('#times-' + id, '<button class="queueButton" type="button" ' +
+	'onclick="setStamp(' + id + ', \'d\')">grab end</button>');
 	
 
 	//crf value
-	appendTxt("#video-" + id, '<div class="quality" id="quality-' + id + '"></div>');
+	appendTxt("#col1-" + id, '<div class="quality" id="quality-' + id + '"></div>');
 	appendTxt('#quality-' + id, '<b>Quality Level:</b> Lower Number = Higher Quality. 18-32 is the sane range.<br>');
 	appendTxt("#quality-" + id, "<br>");
 	appendTxt('#quality-' + id, '<div id="jqCrf-' + id + '" class="jqCrf"></div>');
@@ -767,7 +777,7 @@ function filmForm(film){
 	appendTxt("#quality-" + id, "<br>");
 	
 	//crop
-	appendTxt("#video-" + id, '<div class="sizing" id="sizing-' + id + '"></div>');
+	appendTxt("#col1-" + id, '<div class="sizing" id="sizing-' + id + '"></div>');
 	appendTxt('#sizing-' + id, '<div class="cropRow" id="cropRow-' + id + '"></div>');	
 	appendTxt('#cropRow-' + id, '<div class="cropCol" id="cropCol0-' + id + '"></div>');	
 	appendTxt('#cropCol0-' + id, '<b>Crop:</b>');
@@ -807,7 +817,7 @@ function filmForm(film){
 	appendTxt("#naming-" + id, "<br>");
 
 	//extension choice
-	appendTxt("#video-" + id, '<div class="extension" id="extension-' + id + '"></div>');
+	appendTxt("#col1-" + id, '<div class="extension" id="extension-' + id + '"></div>');
 	appendTxt('#extension-' + id, "<b>Extension Choice:</b>");
 	appendTxt('#extension-' + id, "<br>");
 	appendTxt('#extension-' + id, '<div class="extRow" id="extRow-' + id + '"></div>');
@@ -846,15 +856,7 @@ function filmForm(film){
 	'" placeholder="23" value="23" min="0">');
 	appendTxt('#gifInfo-' + id, '<br>');
 
-	appendTxt('#extension-' + id, '<div class="outRow" id="outRow-' + id + '"></div>');
-	appendTxt('#outRow-' + id, '<div class="outCol" id="outCol0-' + id + '"></div>');
-	appendTxt('#outRow-' + id, '<div class="outCol" id="outCol1-' + id + '"></div>');
-	appendTxt("#outCol0-" + id, '<input id="outDir-' + id + '" type="file" webkitdirectory="true" class="dirButton" ' + 
-	'onchange="filmDir(' + id + ')"></input>');
 
-	appendTxt('#outCol1-' + id, '<div class="outDirBox" id="outDirBox-' + id + '"></div>');
-	appendTxt('#outDirBox-' + id, 
-		'<b class="outDirCon" id="outDirCon-' + id + '"></b>');
 
 	appendTxt('#extension-' + id, '<br>');
 
@@ -906,10 +908,17 @@ function filmForm(film){
 
 	appendTxt('#playCol-' + id, '<button class="queueButton" type="button" ' +
 	'onclick="playVid(' + id + ')">Play Video</button>');
-	appendTxt('#playCol-' + id, '<button class="queueButton" type="button" ' +
-	'onclick="setStamp(' + id + ', \'s\')">grab start</button>');
-	appendTxt('#playCol-' + id, '<button class="queueButton" type="button" ' +
-	'onclick="setStamp(' + id + ', \'d\')">grab end</button>');
+
+
+	appendTxt('#video-' + id, '<div class="outRow" id="outRow-' + id + '"></div>');
+	appendTxt('#outRow-' + id, '<div class="outCol" id="outCol0-' + id + '"></div>');
+	appendTxt('#outRow-' + id, '<div class="outCol" id="outCol1-' + id + '"></div>');
+	appendTxt("#outCol0-" + id, '<input id="outDir-' + id + '" type="file" webkitdirectory="true" class="dirButton" ' + 
+	'onchange="filmDir(' + id + ')"></input>');
+
+	appendTxt('#outCol1-' + id, '<div class="outDirBox" id="outDirBox-' + id + '"></div>');
+	appendTxt('#outDirBox-' + id, 
+		'<b class="outDirCon" id="outDirCon-' + id + '"></b>');
 
 }
 
