@@ -163,27 +163,10 @@ function setStamp(id, opt) {
 		}
 		$('#durBox-' + id).val(tempFilm.stamps[1]);
 	}
-	console.log('Current: ' + tempFilm.playing + ' Start: ' + tempFilm.stamps[0] + ' End: ' + tempFilm.stamps[1])
+	console.log('Current: ' + tempFilm.playing + ' Start: ' + tempFilm.stamps[0] + 
+		' End: ' + tempFilm.stamps[1])
 }
 
-function playVid(id) {
-	var tempFilm = findFilm(id);
-	var path = tempFilm.filepath;
-
-	const mpvPlay = spawn('mpv', ['--osd-fractions', path]);
-	
-	mpvPlay.stderr.on('data', (data) => {
-		getStamp(data.toString(), tempFilm);
-	});
-	
-	mpvPlay.on('close', (code) => {
-		console.log('mpv has been closed');
-	});
-
-	mpvPlay.on('error', (err) => {
-		console.log('MPV Err: ' + err);
-	});
-}
 
 //Updates progress bar from given ffmpeg output
 function progUpdate(line, clipId, duration){
@@ -596,6 +579,55 @@ function formProcess(id){
 		}
 	});
 }
+
+function getMpvEvent(line, film) {
+	var startReg=/.*START.*/;
+	var endReg=/.*END.*/;
+	var id = film.id;
+	var createReg=/.*CREATE.*/;
+	if (line.match(startReg)){
+		console.log('Set Start');	
+		setStamp(id, 's');
+	}
+	if (line.match(endReg)){
+		console.log('Set Duration');	
+		setStamp(id, 'd');
+	}
+	if (line.match(createReg)){
+		var clipId = clipCount;
+		formProcess(id);
+		runCommand(clipId);
+
+	}
+	//console.log(line);
+}
+
+//Opens MPV and plays selected video file
+function playVid(id) {
+	var tempFilm = findFilm(id);
+	var path = tempFilm.filepath;
+	var scriptPath = __dirname + '/../extraResources/stamps.lua'
+	console.log('Script Path: ' + scriptPath);
+	const mpvPlay = spawn('mpv', ['--osd-fractions', '--script=' + scriptPath, path]);
+	
+	mpvPlay.stderr.on('data', (data) => {
+		getStamp(data.toString(), tempFilm);
+	});
+	
+	mpvPlay.stdout.on('data', (data) => {
+		getMpvEvent(data.toString(), tempFilm);
+	});
+	
+	mpvPlay.on('close', (code) => {
+		console.log('mpv has been closed');
+	});
+
+	mpvPlay.on('error', (err) => {
+		console.log('MPV Err: ' + err);
+	});
+}
+
+
 
 //Gets first stylesheet
 function getStyleSheet() {

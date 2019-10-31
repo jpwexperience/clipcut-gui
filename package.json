@@ -8,6 +8,11 @@
     "package": "electron-forge package",
     "make": "electron-forge make"
   },
+  "build": {
+    "extraResources": [
+      "./extraResources/**"
+    ]
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/jpwexperience/clipcut-gui.git"
