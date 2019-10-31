@@ -43,7 +43,7 @@ input[type='radio'] {
 	text-shadow: 2px 2px 1px #1b2532;
 	font-weight: 700;
 	font-size: 16pt;
-	margin-top: 0px;
+	margin: 0px 0px 0px 0px;
 }
 
 .footer {
@@ -137,7 +137,7 @@ input[type='radio'] {
 	text-align: center;
 }
 
-.topButRow {
+.mainButtons {
 	display: grid;
 	grid-template-columns: 1fr 1fr;
 	object-fit: cover;
@@ -157,6 +157,7 @@ input[type='radio'] {
 .topButCol {
 	background-color: none;
 	padding: 8px 0px;
+	margin-top: 20px;
 }
 
 .outRow {
@@ -266,7 +267,7 @@ input[type='radio'] {
 }
 
 
-.inputDiv, .clipProgress {
+.video, .clipProgress {
 	background-color: #abb4c8;
 	border: 1px solid #1b2532;
 	margin-top: 10px;

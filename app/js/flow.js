@@ -619,98 +619,102 @@ function filmDir(id){
 //Creates user input form given a film object
 function filmForm(film){
 	var id = film.id;
-	appendTxt(".clipForm", '<div id="inputDiv-' + id +'" class="inputDiv"><br></div>');
-	appendTxt("#inputDiv-" + id, '<form method="post" id="form-' + id + '"></form>');
-	appendTxt("#form-" + id, "<b>Filename: " + path.basename(film.filepath) + "</b><br><br>"); 
+	appendTxt(".videoQueue", '<div id="video-' + id +'" class="video"></div>');
+	appendTxt("#video-" + id, '<div class="vTitle" id="vTitle-' + id + '"></div>');
+	appendTxt("#vTitle-" + id, "<b>Filename: " + path.basename(film.filepath) + "</b><br><br>"); 
+	appendTxt("#video-" + id, '<div class="streams" id="streams-' + id + '"></div>');
 
 	//Video Choice
 	if (film.video.length == 0){
-		appendTxt("#form-" + id, "<b>No Video Streams</b><br>");
+		appendTxt("#streams-" + id, "<b>No Video Streams</b><br>");
 	} else{
-		appendTxt("#form-" + id, "<b>Video Streams</b><br>");
+		appendTxt("#streams-" + id, "<b>Video Streams</b><br>");
 		for (var i = 0; i < film.video.length; i++){
-			appendTxt("#form-" + id, '<input type="radio" name="vStreams-' + id + '" ' + 
+			appendTxt("#streams-" + id, '<input type="radio" name="vStreams-' + id + '" ' + 
 			'id="vStreams-' + i + '-' + id + '" value="' + i + '">' + film.video[i] + '<br>');
 			if(i == 0){
 				radioCheck("#vStreams-" + i + "-" + id, true);
 			}
 		}
 	}
-	appendTxt("#form-" + id, "<br>");
+	appendTxt("#streams-" + id, "<br>");
 
 	//Audio Choice
 	if (film.audio.length == 0){
-		appendTxt("#form-" + id, "<b>No Audio Streams</b><br>");
-		appendTxt("#form-" + id, '<input type="radio" name="aStreams-' + id + '" ' + 
+		appendTxt("#streams-" + id, "<b>No Audio Streams</b><br>");
+		appendTxt("#streams-" + id, '<input type="radio" name="aStreams-' + id + '" ' + 
 		'id="aStreams-noaudio-"' + id + '" value="-1">No Audio<br>');
 		radioCheck("#aStreams-noaudio-" + id, true);
 	} else{
-		appendTxt("#form-" + id, "<b>Audio Streams</b><br>");
-		appendTxt("#form-" + id, '<input type="radio" name="aStreams-' + id + '" ' + 
+		appendTxt("#streams-" + id, "<b>Audio Streams</b><br>");
+		appendTxt("#streams-" + id, '<input type="radio" name="aStreams-' + id + '" ' + 
 		'id="aStreams-noaudio-' + id + '" value="-1"> No Audio<br>');
 		for (var i = 0; i < film.audio.length; i++){
-			appendTxt("#form-" + id, '<input type="radio" name="aStreams-' + id + '" ' + 
+			appendTxt("#streams-" + id, '<input type="radio" name="aStreams-' + id + '" ' + 
 			'id="aStreams-' + i + '-' + id + '" value="' + i + '">' + film.audio[i] + '<br>');
 			if(i == 0){
 				radioCheck("#aStreams-" + i + "-" + id, true);
 			}
 		}
 	}
-	appendTxt("#form-" + id, "<br>");
+	appendTxt("#streams-" + id, "<br>");
 
 	//Subtitle Choice
 	if (film.subtitle.length + film.extSubs.length == 0){
-		appendTxt("#form-" + id, "<b>No Subtitles Available</b><br>");
-		appendTxt("#form-" + id, '<input type="radio" name="sStreams-' + id + '" ' + 
+		appendTxt("#streams-" + id, "<b>No Subtitles Available</b><br>");
+		appendTxt("#streams-" + id, '<input type="radio" name="sStreams-' + id + '" ' + 
 		'id="sStreams-nosub-' + id + '" value="-1"> No Subtitles<br>');
 		radioCheck("#sStreams-nosub-" + id, true);
 	} else{
-		appendTxt("#form-" + id, "<b>Subtitle Streams</b><br>");
-		appendTxt("#form-" + id, '<input type="radio" name="sStreams-' + id + '" ' + 
+		appendTxt("#streams-" + id, "<b>Subtitle Streams</b><br>");
+		appendTxt("#streams-" + id, '<input type="radio" name="sStreams-' + id + '" ' + 
 		'id="sStreams-nosub-' + id + '" value="-1"> No Subtitles<br>');
 		radioCheck("#sStreams-nosub-" + id, true);
 		for (var i = 0; i < film.subtitle.length + film.extSubs.length; i++){
 			if (i < film.subtitle.length){
-				appendTxt("#form-" + id, '<input type="radio" name="sStreams-' + id + '" ' + 
+				appendTxt("#streams-" + id, '<input type="radio" name="sStreams-' + id + '" ' + 
 				'id="sStreams-' + i + '-' + id + '" value="' + i + '">' + film.subtitle[i] + '<br>');
 			} else{
 				var extInd = i - film.subtitle.length;
-				appendTxt("#form-" + id, '<input type="radio" name="sStreams-' + id + '" ' + 
+				appendTxt("#streams-" + id, '<input type="radio" name="sStreams-' + id + '" ' + 
 				'id="sStreams-' + i + '-' + id + '" value="' + i + '"> ' + 
 				path.basename(film.extSubs[extInd]) + '<br>');
 			}
 		}
 	}
-	appendTxt("#form-" + id, "<br>");
+	appendTxt("#streams-" + id, "<br>");
 
+	appendTxt("#video-" + id, '<div class="times" id="times-' + id + '"></div>');
 	//start time
-	appendTxt("#form-" + id, '<div class="formRow" id="startRow-' + id + '"></div>');
+	appendTxt("#times-" + id, '<div class="formRow" id="startRow-' + id + '"></div>');
 	appendTxt("#startRow-" + id, '<div class="formColumn" id="startCol-' + id + '"></div>');
 	appendTxt("#startCol-" + id, "<b>Clip Start:</b>");
 	appendTxt("#startRow-" + id, '<div class="formColumn" id="startColEntry-' + id + '"></div>');
 	appendTxt("#startColEntry-" + id, '<input type="text" class="textBox" id="startBox-' + 
 	id + '" placeholder="00:00:00.00">');
 	
-	appendTxt("#form-" + id, "<br>");
+	appendTxt("#times-" + id, "<br>");
 	
 	//duration
-	appendTxt("#form-" + id, '<div class="formRow" id="durRow-' + id + '"></div>');
+	appendTxt("#times-" + id, '<div class="formRow" id="durRow-' + id + '"></div>');
 	appendTxt("#durRow-" + id, '<div class="formColumn" id="durCol-' + id + '"></div>');
 	appendTxt("#durCol-" + id, "<b>Clip Duration:</b>");
 	appendTxt("#durRow-" + id, '<div class="formColumn" id="durColEntry-' + id + '"></div>');
 	appendTxt("#durColEntry-" + id, '<input type="text" class="textBox" id="durBox-' + id + '" placeholder="1:00">');
-	appendTxt("#form-" + id, "<br>");
+	appendTxt("#times-" + id, "<br>");
 	
 
 	//crf value
-	appendTxt('#form-' + id, '<b>Quality Level:</b> Lower Number = Higher Quality. 18-32 is the sane range.<br>');
-	appendTxt("#form-" + id, "<br>");
-	appendTxt('#form-' + id, '<div id="jqCrf-' + id + '" class="jqCrf"></div>');
+	appendTxt("#video-" + id, '<div class="quality" id="quality-' + id + '"></div>');
+	appendTxt('#quality-' + id, '<b>Quality Level:</b> Lower Number = Higher Quality. 18-32 is the sane range.<br>');
+	appendTxt("#quality-" + id, "<br>");
+	appendTxt('#quality-' + id, '<div id="jqCrf-' + id + '" class="jqCrf"></div>');
 	appendTxt('#jqCrf-' + id, '<div id="jqSlide-' + id + '" class="ui-slider-handle"></div>');
-	appendTxt("#form-" + id, "<br>");
+	appendTxt("#quality-" + id, "<br>");
 	
 	//crop
-	appendTxt('#form-' + id, '<div class="cropRow" id="cropRow-' + id + '"></div>');	
+	appendTxt("#video-" + id, '<div class="sizing" id="sizing-' + id + '"></div>');
+	appendTxt('#sizing-' + id, '<div class="cropRow" id="cropRow-' + id + '"></div>');	
 	appendTxt('#cropRow-' + id, '<div class="cropCol" id="cropCol0-' + id + '"></div>');	
 	appendTxt('#cropCol0-' + id, '<b>Crop:</b>');
 
@@ -725,32 +729,34 @@ function filmForm(film){
 	appendTxt("#cropCol3-" + id, '<input type="number" class="cropBox" id="cropBox1-' + id + 
 	'" placeholder="' + film.height + '" value="' + film.height + '" step="2" min="2" max="' + film.height + '">');
 	
-	appendTxt("#form-" + id, "<br>");
+	appendTxt("#sizing-" + id, "<br>");
 
 
 	//scale
-	appendTxt('#form-' + id, '<div class="scaleRow" id="scaleRow-' + id + '"></div>'); 
+	appendTxt('#sizing-' + id, '<div class="scaleRow" id="scaleRow-' + id + '"></div>'); 
 	appendTxt('#scaleRow-' + id, '<div class="scaleCol" id="scaleCol0-' + id + '"></div>'); 
 	appendTxt('#scaleCol0-' + id, '<b>Scale Width: </b>');
 
 	appendTxt('#scaleRow-' + id, '<div class="scaleCol" id="scaleCol1-' + id + '"></div>'); 
 	appendTxt("#scaleCol1-" + id, '<input type="number" class="scaleBox" id="scaleBox-' + id + 
 	'" placeholder="' + film.width + '" value="' + film.width + '" step="2" min="2" max="' + film.width + '">');
-	appendTxt('#form-' + id, '<br>');
+	appendTxt('#sizing-' + id, '<br>');
 
 	//clip name
-	appendTxt("#form-" + id, "<b>Enter Clip Name:</b>");
-	appendTxt("#form-" + id, "<br>");
+	appendTxt("#video-" + id, '<div class="naming" id="naming-' + id + '"></div>');
+	appendTxt("#naming-" + id, "<b>Enter Clip Name:</b>");
+	appendTxt("#naming-" + id, "<br>");
 	var nameHolder = path.basename(film.filepath).replace(/\.[^/.]+$/, "") + "-cut";
 	film.nameHolder = nameHolder;
-	appendTxt("#form-" + id, '<input type="text" id="nameBox-' + id + '" placeholder="' + nameHolder + '" class="clipTextBox">');
-	appendTxt("#form-" + id, "<br>");
-	appendTxt("#form-" + id, "<br>");
+	appendTxt("#naming-" + id, '<input type="text" id="nameBox-' + id + '" placeholder="' + nameHolder + '" class="clipTextBox">');
+	appendTxt("#naming-" + id, "<br>");
+	appendTxt("#naming-" + id, "<br>");
 
 	//extension choice
-	appendTxt('#form-' + id, "<b>Extension Choice:</b>");
-	appendTxt('#form-' + id, "<br>");
-	appendTxt('#form-' + id, '<div class="extRow" id="extRow-' + id + '"></div>');
+	appendTxt("#video-" + id, '<div class="extension" id="extension-' + id + '"></div>');
+	appendTxt('#extension-' + id, "<b>Extension Choice:</b>");
+	appendTxt('#extension-' + id, "<br>");
+	appendTxt('#extension-' + id, '<div class="extRow" id="extRow-' + id + '"></div>');
 	appendTxt('#extRow-' + id, '<div class="extCol" id="extCol0-' + id + '"></div>');
 
 	appendTxt('#extCol0-' + id, '<input type="radio" id="ext-' + id + '" name="ext-' + id + '" value="mp4"> .mp4');
@@ -766,7 +772,7 @@ function filmForm(film){
 	appendTxt('#extCol1-' + id, '<input type="radio" name="ext-' + id + '" value="webm"> .webm');
 	appendTxt('#extRow-' + id, "<br>");
 
-	appendTxt('#form-' + id, '<div class="webmInfo" id="webmInfo-' + id + '"></div>');
+	appendTxt('#extension-' + id, '<div class="webmInfo" id="webmInfo-' + id + '"></div>');
 	appendTxt('#webmInfo-' + id, '<div class="extraRow" id="webmRow-' + id + '"></div>');
 	appendTxt('#webmRow-' + id, '<div class="extraCol" id="webmCol0-' + id + '"></div>');
 	appendTxt('#webmCol0-' + id, '<b>Bitrate in MB: </b>');
@@ -776,7 +782,7 @@ function filmForm(film){
 	'" placeholder="0.50" value="0.50" step="0.5" min="0">');
 	appendTxt('#webmInfo-' + id, '<br>');
 
-	appendTxt('#form-' + id, '<div class="gifInfo" id="gifInfo-' + id + '"></div>');
+	appendTxt('#extension-' + id, '<div class="gifInfo" id="gifInfo-' + id + '"></div>');
 	appendTxt('#gifInfo-' + id, '<div class="extraRow" id="gifRow-' + id + '"></div>');
 	appendTxt('#gifRow-' + id, '<div class="extraCol" id="gifCol0-' + id + '"></div>');
 	appendTxt('#gifCol0-' + id, '<b>Framerate: </b>');
@@ -786,7 +792,7 @@ function filmForm(film){
 	'" placeholder="23" value="23" min="0">');
 	appendTxt('#gifInfo-' + id, '<br>');
 
-	appendTxt('#form-' + id, '<div class="outRow" id="outRow-' + id + '"></div>');
+	appendTxt('#extension-' + id, '<div class="outRow" id="outRow-' + id + '"></div>');
 	appendTxt('#outRow-' + id, '<div class="outCol" id="outCol0-' + id + '"></div>');
 	appendTxt('#outRow-' + id, '<div class="outCol" id="outCol1-' + id + '"></div>');
 	appendTxt("#outCol0-" + id, '<input id="outDir-' + id + '" type="file" webkitdirectory="true" class="dirButton" ' + 
@@ -796,7 +802,7 @@ function filmForm(film){
 	appendTxt('#outDirBox-' + id, 
 		'<b class="outDirCon" id="outDirCon-' + id + '"></b>');
 
-	appendTxt('#form-' + id, '<br>');
+	appendTxt('#extension-' + id, '<br>');
 
 	//Functionality for form buttons
 	$(document).ready(function () {
@@ -833,7 +839,7 @@ function filmForm(film){
 	});
 	
 	//submit buttons
-	appendTxt('#form-' + id, '<div class="formButRow" id="filmBut-' + id + '"></div>');
+	appendTxt('#video-' + id, '<div class="formButRow" id="filmBut-' + id + '"></div>');
 	appendTxt('#filmBut-' + id, '<div class="formButCol" id="submitCol-' + id +'"></div>');
 	appendTxt('#filmBut-' + id, '<div class="formButCol" id="removeCol-' + id +'"></div>');
 	appendTxt('#filmBut-' + id, '<div class="formButCol" id="playCol-' + id +'"></div>');
@@ -842,7 +848,7 @@ function filmForm(film){
 	'onclick="formProcess(' + id + ')">Add to Queue</button>');
 
 	appendTxt('#removeCol-' + id, '<button class="queueButton" type="button" ' +
-	'onclick="removeFilm(' + id + ', \'#inputDiv-' + id + '\')">Remove Video</button>');
+	'onclick="removeFilm(' + id + ', \'#video-' + id + '\')">Remove Video</button>');
 
 	appendTxt('#playCol-' + id, '<button class="queueButton" type="button" ' +
 	'onclick="playVid(' + id + ')">Play Video</button>');
