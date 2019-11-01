@@ -108,6 +108,7 @@ input[type='radio'] {
 	margin: 0px 10px 10px 10px;
 }
 
+
 .row {
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
@@ -158,7 +159,6 @@ input[type='radio'] {
 
 .topButCol {
 	background-color: none;
-	padding: 8px 0px;
 	margin-top: 20px;
 }
 
@@ -167,7 +167,8 @@ input[type='radio'] {
 	grid-template-columns: 1fr 1fr;
 	object-fit: cover;
 	text-align: left;
-	grid-gap: 10px; 
+	grid-gap: 10px;  
+	margin-bottom: 10px;
 }
 
 .outRow {
@@ -217,7 +218,7 @@ input[type='radio'] {
 
 .cropRow {
 	display: grid;
-	grid-template-columns: 125px 55px 20px 55px;
+	grid-template-columns: 100px 55px 20px 55px;
 	object-fit: cover;
 	grid-gap: 0px;
 	margin: 5px 40px 0px 0px;
@@ -232,7 +233,7 @@ input[type='radio'] {
 
 .scaleRow {
 	display: grid;
-	grid-template-columns: 125px 100px;
+	grid-template-columns: 100px 100px;
 	object-fit: cover;
 	grid-gap: 0px;
 	margin: 0px 40px 0px 0px;
@@ -289,6 +290,10 @@ input[type='radio'] {
 	border-left-color: #1b2532;
 	border-right-color: #656ba3;
 	border-bottom-color: #656ba3;
+}
+
+.video {
+	overflow: auto;
 }
 
 .textBox, .clipTextBox, .cropBox, .extraBox, .scaleBox, .outDirBox, .ffCmd {

@@ -465,6 +465,26 @@ function clipQueue(extension, clipName, clipCount){
 	}
 }
 
+function fileCheck(film, clipName, ext, start, dur){
+	var clipPath = '';
+	if(film.dirPath !== undefined){
+		var clipPath = film.dirPath + '/' + clipName;
+	} else{
+		var clipPath = path.dirname(film.filepath) + '/' + clipName;
+	}
+	var badname = true;
+	while (badname){
+		var tempPath = clipPath + '.' + ext;
+		if (fs.existsSync(tempPath)) {
+			clipPath += '_' + start + '-' + dur;
+		} else {
+			badname = false;
+		}
+	}
+	clipPath += '.' + ext;
+	return path.basename(clipPath, path.extname(clipPath));
+}
+
 //elem: some object
 //if object is null, return val
 //return the object otherwise
@@ -500,6 +520,9 @@ function formProcess(id){
 		var fps = emptyCheck($("#extraBox1-" + id).val(), '23');
 		var clipName = emptyCheck($("#nameBox-" + id).val(), emptyName); 
 
+		clipName = fileCheck(tempFilm, clipName, extension, start, dur);
+		console.log('Final Clip Name: ' + clipName);
+		
 		var stampReg = /^(([1-5]?[0-9]|[0][0-9]):){1,2}(([1-5]?[0-9]|[0][0-9])(\.[0-9]+)?)$|^([0-9]+(\.[0-9]{1,3})?)$/;
 		var stampMatch = start.match(stampReg);
 		console.log(stampMatch);
@@ -770,7 +793,7 @@ function filmForm(film){
 
 	//crf value
 	appendTxt("#col1-" + id, '<div class="quality" id="quality-' + id + '"></div>');
-	appendTxt('#quality-' + id, '<b>Quality Level:</b> Lower Number = Higher Quality. 18-32 is the sane range.<br>');
+	appendTxt('#quality-' + id, '<br><b>Quality Level:</b> Lower Number = Higher Quality. 18-32 is the sane range.<br>');
 	appendTxt("#quality-" + id, "<br>");
 	appendTxt('#quality-' + id, '<div id="jqCrf-' + id + '" class="jqCrf"></div>');
 	appendTxt('#jqCrf-' + id, '<div id="jqSlide-' + id + '" class="ui-slider-handle"></div>');
@@ -807,7 +830,7 @@ function filmForm(film){
 	appendTxt('#sizing-' + id, '<br>');
 
 	//clip name
-	appendTxt("#video-" + id, '<div class="naming" id="naming-' + id + '"></div>');
+	appendTxt("#col1-" + id, '<div class="naming" id="naming-' + id + '"></div>');
 	appendTxt("#naming-" + id, "<b>Enter Clip Name:</b>");
 	appendTxt("#naming-" + id, "<br>");
 	var nameHolder = path.basename(film.filepath).replace(/\.[^/.]+$/, "") + "-cut";
@@ -817,7 +840,7 @@ function filmForm(film){
 	appendTxt("#naming-" + id, "<br>");
 
 	//extension choice
-	appendTxt("#col1-" + id, '<div class="extension" id="extension-' + id + '"></div>');
+	appendTxt("#col0-" + id, '<div class="extension" id="extension-' + id + '"></div>');
 	appendTxt('#extension-' + id, "<b>Extension Choice:</b>");
 	appendTxt('#extension-' + id, "<br>");
 	appendTxt('#extension-' + id, '<div class="extRow" id="extRow-' + id + '"></div>');
@@ -910,7 +933,7 @@ function filmForm(film){
 	'onclick="playVid(' + id + ')">Play Video</button>');
 
 
-	appendTxt('#video-' + id, '<div class="outRow" id="outRow-' + id + '"></div>');
+	appendTxt('#col1-' + id, '<div class="outRow" id="outRow-' + id + '"></div>');
 	appendTxt('#outRow-' + id, '<div class="outCol" id="outCol0-' + id + '"></div>');
 	appendTxt('#outRow-' + id, '<div class="outCol" id="outCol1-' + id + '"></div>');
 	appendTxt("#outCol0-" + id, '<input id="outDir-' + id + '" type="file" webkitdirectory="true" class="dirButton" ' + 
