@@ -29,3 +29,6 @@ Crop: Width and Height of the output video in pixels.<br />
 Scale: Width of output video in pixels. Final video height will be scaled accordingly. If final video height is an odd number, pixels will eb added until it is even due to ffmpeg's usage.<br />
 FPS: Frames per second of output gif<br />
 Bitrate: Bitrate of output webm in MB<br />
+
+### Video Player Settings
+* Uses mpv command line interface to play video. Not likely to work on windows in current state.
