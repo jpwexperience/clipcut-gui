@@ -8,10 +8,6 @@ body {
 	color: #1b2532;
 }
 
-h1 {
-	text-align: center;
-}
-
 input {
 	color: rgba(251, 250, 244, 1);
 	outline: none;
@@ -46,9 +42,8 @@ input[type='radio'] {
 	color: rgba(251, 250, 244, 1);
 	text-shadow: 2px 2px 1px #1b2532;
 	font-weight: 700;
-	padding: 8px 0px;
 	font-size: 16pt;
-	margin-top: 0px;
+	margin: 0px 0px 0px 0px;
 }
 
 .footer {
@@ -100,13 +95,27 @@ input[type='radio'] {
 	display: none;
 }
 
+.vidController {
+	background-color: #7887a9;
+	border: 1px solid #1b2532;
+	border-style: solid;
+	border-width: 5px;
+	border-top-color: #1b2532;
+	border-left-color: #1b2532;
+	border-right-color: #656ba3;
+	border-bottom-color: #656ba3;
+	padding: 0px 10px 10px 10px;
+	margin: 0px 10px 10px 10px;
+}
+
+
 .row {
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
 	object-fit: cover;
 	text-align: left;
 	grid-gap: 20px;
-	margin: 0px 10px 60px 10px;
+	margin: 0px 10px 20px 10px;
 }
 
 .column {
@@ -131,7 +140,6 @@ input[type='radio'] {
 }
 
 .queueCol {
-	background-color: none;
 	line-height: 25px;
 	width: 280px;
 	padding: 0px;
@@ -142,16 +150,25 @@ input[type='radio'] {
 	text-align: center;
 }
 
-.topButRow {
+.mainButtons {
 	display: grid;
-	grid-template-columns: 200px 200px;
+	grid-template-columns: 1fr 1fr;
 	object-fit: cover;
-	text-align: left;
+	text-align: center;
 }
 
 .topButCol {
 	background-color: none;
-	padding: 8px 0px;
+	margin-top: 20px;
+}
+
+.row0 {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	object-fit: cover;
+	text-align: left;
+	grid-gap: 10px;  
+	margin-bottom: 10px;
 }
 
 .outRow {
@@ -186,7 +203,7 @@ input[type='radio'] {
 
 .formButRow {
 	display: grid;
-	grid-template-columns: 125px 125px;
+	grid-template-columns: 125px 125px 125px;
 	width: 100%;
 	object-fit: cover;
 	grid-gap: 10px;
@@ -200,68 +217,68 @@ input[type='radio'] {
 }
 
 .cropRow {
-        display: grid;
-        grid-template-columns: 125px 55px 20px 55px;
-        object-fit: cover;
-        grid-gap: 0px;
-        margin: 5px 40px 0px 0px;
+	display: grid;
+	grid-template-columns: 100px 55px 20px 55px;
+	object-fit: cover;
+	grid-gap: 0px;
+	margin: 5px 40px 0px 0px;
 }
 
 .cropCol {
-        background-color: none;
-        line-height: 25px;
-        width: 100%;
-        padding: 0px;
+	background-color: none;
+	line-height: 25px;
+	width: 100%;
+	padding: 0px;
 }
 
 .scaleRow {
-        display: grid;
-        grid-template-columns: 125px 100px;
-        object-fit: cover;
-        grid-gap: 0px;
-        margin: 0px 40px 0px 0px;
+	display: grid;
+	grid-template-columns: 100px 100px;
+	object-fit: cover;
+	grid-gap: 0px;
+	margin: 0px 40px 0px 0px;
 }
 
 .scaleCol {
-        background-color: none;
-        line-height: 25px;
-        width: 100%;
-        padding: 0px;
+	background-color: none;
+	line-height: 25px;
+	width: 100%;
+	padding: 0px;
 }
 
 
 .extRow {
-        display: grid;
-        grid-template-columns: 110px 110px;
-        object-fit: cover;
-        grid-gap: 0px;
-        margin: 5px 40px 0px 0px;
+	display: grid;
+	grid-template-columns: 110px 110px;
+	object-fit: cover;
+	grid-gap: 0px;
+	margin: 5px 40px 0px 0px;
 }
 
 .extCol {
-        background-color: none;
-        line-height: 25px;
-        width: 100%;
-        padding: 0px;
+	background-color: none;
+	line-height: 25px;
+	width: 100%;
+	padding: 0px;
 }
 
 .extraRow {
-        display: grid;
-        grid-template-columns: 110px 110px;
-        object-fit: cover;
-        grid-gap: 0px;
-        margin: 5px 40px 0px 0px;
+	display: grid;
+	grid-template-columns: 110px 110px;
+	object-fit: cover;
+	grid-gap: 0px;
+	margin: 5px 40px 0px 0px;
 }
 
 .extraCol {
-        background-color: none;
-        line-height: 25px;
-        width: 100%;
-        padding: 0px;
+	background-color: none;
+	line-height: 25px;
+	width: 100%;
+	padding: 0px;
 }
 
 
-.inputDiv, .clipProgress {
+.video, .clipProgress {
 	background-color: #abb4c8;
 	border: 1px solid #1b2532;
 	margin-top: 10px;
@@ -273,6 +290,10 @@ input[type='radio'] {
 	border-left-color: #1b2532;
 	border-right-color: #656ba3;
 	border-bottom-color: #656ba3;
+}
+
+.video {
+	overflow: auto;
 }
 
 .textBox, .clipTextBox, .cropBox, .extraBox, .scaleBox, .outDirBox, .ffCmd {
@@ -306,14 +327,14 @@ input[type='radio'] {
 
 .errBox {
 	width: 100%;
-        height: 20px;
-        background: red;
-        border-style: solid;
-        border-width: 2px;
-        border-top-color: #1b2532;
-        border-left-color: #1b2532;
-        border-right-color: #656ba3;
-        border-bottom-color: #656ba3;
+	height: 20px;
+	background: red;
+	border-style: solid;
+	border-width: 2px;
+	border-top-color: #1b2532;
+	border-left-color: #1b2532;
+	border-right-color: #656ba3;
+	border-bottom-color: #656ba3;
 }
 
 .cropBox, .scaleBox {
@@ -354,19 +375,19 @@ input[type='radio'] {
 	content: 'Select Output Folder';
 	padding: 8px 5px;
 	background-color: #7887a9;
-        cursor: pointer;
-        color: rgba(251, 250, 244, 1);
-        text-shadow: 2px 2px 1px #1b2532;
-        font-weight: 500;
-        font-size: 10pt;
-        height: 35px;
-        border-style: solid;
-        border-width: 2px;
-        border-top-color: #1b2532;
-        border-left-color: #1b2532;
-        border-right-color: #656ba3;
-        border-bottom-color: #656ba3;
-        outline: none;
+	cursor: pointer;
+	color: rgba(251, 250, 244, 1);
+	text-shadow: 2px 2px 1px #1b2532;
+	font-weight: 500;
+	font-size: 10pt;
+	height: 35px;
+	border-style: solid;
+	border-width: 2px;
+	border-top-color: #1b2532;
+	border-left-color: #1b2532;
+	border-right-color: #656ba3;
+	border-bottom-color: #656ba3;
+	outline: none;
 }
 
 .dirButtonCh::before{
@@ -435,66 +456,66 @@ input[type='radio'] {
 }
 
 @keyframes blink {
-    /**
-     * At the start of the animation the dot
-     * has an opacity of .2
-     */
-    0% {
-      opacity: .2;
-    }
-    /**
-     * At 20% the dot is fully visible and
-     * then fades out slowly
-     */
-    20% {
-      opacity: 1;
-    }
-    /**
-     * Until it reaches an opacity of .2 and
-     * the animation can start again
-     */
-    100% {
-      opacity: .2;
-    }
+	/**
+	 * At the start of the animation the dot
+	 * has an opacity of .2
+	 */
+	0% {
+		opacity: .2;
+	}
+	/**
+	 * At 20% the dot is fully visible and
+	 * then fades out slowly
+	 */
+	20% {
+		opacity: 1;
+	}
+	/**
+	 * Until it reaches an opacity of .2 and
+	 * the animation can start again
+	 */
+	100% {
+		opacity: .2;
+	}
 }
 
 .processing span {
-    /**
-     * Use the blink animation, which is defined above
-     */
-    animation-name: blink;
-    /**
-     * The animation should take 1.4 seconds
-     */
-    animation-duration: 1.4s;
-    /**
-     * It will repeat itself forever
-     */
-    animation-iteration-count: infinite;
-    /**
-     * This makes sure that the starting style (opacity: .2)
-     * of the animation is applied before the animation starts.
-     * Otherwise we would see a short flash or would have
-     * to set the default styling of the dots to the same
-     * as the animation. Same applies for the ending styles.
-     */
-    animation-fill-mode: both;
+	/**
+	 * Use the blink animation, which is defined above
+	 */
+	animation-name: blink;
+	/**
+	 * The animation should take 1.4 seconds
+	 */
+	animation-duration: 1.4s;
+	/**
+	 * It will repeat itself forever
+	 */
+	animation-iteration-count: infinite;
+	/**
+	 * This makes sure that the starting style (opacity: .2)
+	 * of the animation is applied before the animation starts.
+	 * Otherwise we would see a short flash or would have
+	 * to set the default styling of the dots to the same
+	 * as the animation. Same applies for the ending styles.
+	 */
+	animation-fill-mode: both;
 }
 
 .processing span:nth-child(2) {
-    /**
-     * Starts the animation of the third dot
-     * with a delay of .2s, otherwise all dots
-     * would animate at the same time
-     */
-    animation-delay: .2s;
+	/**
+	 * Starts the animation of the third dot
+	 * with a delay of .2s, otherwise all dots
+	 * would animate at the same time
+	 */
+	animation-delay: .2s;
 }
 
 .processing span:nth-child(3) {
-    /**
-     * Starts the animation of the third dot
-     * with a delay of .4s, otherwise all dots
-     * would animate at the same time
-     */
-    animation-delay: .4s;
+	/**
+	 * Starts the animation of the third dot
+	 * with a delay of .4s, otherwise all dots
+	 * would animate at the same time
+	 */
+	animation-delay: .4s;
 }

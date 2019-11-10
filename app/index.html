@@ -2,6 +2,7 @@
 <html>
 	<head>
 		<meta charset="UTF-8">
+		<style></style>
 		<script>
 			window.$ = window.jQuery = require("jquery");
 			require('../node_modules/jquery-ui-dist/jquery-ui');
@@ -13,17 +14,21 @@
 	</head>
 	<body>
 		<div class="main"></div>
+		<div class="vidController" id="vidController">
+			<div class="mainButtons" id="mainButtons">
+				<div class="topButCol" id="topButCol-0">
+					<input class="inFiles" type="File" id="upFile" multiple size="50" onchange="fileUp()">
+				</div>
+				<div class="topButCol" id="topButCol-1">
+					<button type="button" class="clearBut" id="clearBut" onclick="refreshApp()" />
+				</div>
+			</div>
+			<div class="currentVid" id="currentVid"></div>
+		</div>
 		<div class="row">
 			<div class="column">
-				<div class="topButRow" id="topButRow">
-					<div class="topButCol" id="topButCol-0">
-						<input class="inFiles" type="File" id="upFile" multiple size="50" onchange="fileUp()">
-					</div>
-					<div class="topButCol" id="topButCol-1">
-						<button type="button" class="clearBut" id="clearBut" onclick="refreshApp()" />
-					</div>
-				</div>
-				<div class="clipForm"></div>
+				<h3 class="title">Video Queue</h3>
+				<div class="videoQueue"></div>
 			</div>
 			<div class="column">
 				<h3 class="title">Clip Queue</h3>
