@@ -18,9 +18,9 @@ Don't have any error checking on the form as of now so ill formated entries will
 2. run 'npm install' while in repository
 3. run 'npm start'
 
-####Distributables: <a href="https://clipcut.jpwexperience.com" target="_blank">clipcut.jpwexperience.com</a>
+#### Distributables (may not incorporate latest features): <a href="https://clipcut.jpwexperience.com" target="_blank">clipcut.jpwexperience.com</a>
 
-###Input Options:
+### Input Options:
 Clip Start: Timecode (00:00:00.00) or number of seconds of when the clip should start<br />
 Clip Duration: Length of the clip in timecode or seconds<br />
 Quality Level: The crf value when encoding with x264. The lower the number, the higher the quality. Sane range is 18-32 but can go beyond for higher/lower filesizes. May be useful to lower the number when burning subtitles depending on the source.<br />
