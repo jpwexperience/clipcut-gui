@@ -356,7 +356,8 @@ function ffCommand(filmId, vChoice, aChoice, sChoice, start, dur, crf, extension
 				'[0:s:' + sChoice + ']scale=' + width + ':' + height + '[sub]; ' + 
 				'[c][sub]overlay[s];' +  ' [s]scale=' + scale + ':-1[v]', '-map', '[v]');
 			} else{
-				subtitleArr.push('-vf', 'subtitles=' + workingFilm.filepath + ':si=' + sChoice);
+				subtitleArr.push('-vf', 'crop=' + width + ':' + height + ', subtitles=\'' + 
+				workingFilm.filepath + ':si=' + sChoice + '\'' + ', scale=' + scale + ':-1');
 			}
 		}
 	}
