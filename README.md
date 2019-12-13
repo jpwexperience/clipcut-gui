@@ -13,14 +13,14 @@ External subtitles are searched for in the video file firectory.
 
 Don't have any error checking on the form as of now so ill formated entries will likely cause problems.
 
-Getting Started:
+### Getting Started:
 1. Clone repository
 2. run 'npm install' while in repository
 3. run 'npm start'
 
-Distributables: <a href="https://clipcut.jpwexperience.com" target="_blank">clipcut.jpwexperience.com</a>
+#### Distributables (may not incorporate latest features): <a href="https://clipcut.jpwexperience.com" target="_blank">clipcut.jpwexperience.com</a>
 
-Input Options:<br />
+### Input Options:
 Clip Start: Timecode (00:00:00.00) or number of seconds of when the clip should start<br />
 Clip Duration: Length of the clip in timecode or seconds<br />
 Quality Level: The crf value when encoding with x264. The lower the number, the higher the quality. Sane range is 18-32 but can go beyond for higher/lower filesizes. May be useful to lower the number when burning subtitles depending on the source.<br />
@@ -30,5 +30,10 @@ Scale: Width of output video in pixels. Final video height will be scaled accord
 FPS: Frames per second of output gif<br />
 Bitrate: Bitrate of output webm in MB<br />
 
-### Video Player Settings
+### Video Player Settings - Not Tested on Windows
+* Must have MPV installed to use functionality. 
 * Uses mpv command line interface to play video. Not likely to work on windows in current state.
+####Shortcuts
+* CTRL + SHIFT + r - Grabs starting time.
+* CTRL + SHIFT + t - Grabs end time and calculates duration.
+* CTRL + SHIFT + Y - Adds clip to queue given the current settings and starts processing
