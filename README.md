@@ -34,6 +34,6 @@ Bitrate: Bitrate of output webm in MB<br />
 * Must have MPV installed to use functionality. 
 * Uses mpv command line interface to play video. Not likely to work on windows in current state.
 ####Shortcuts
-* CTRL + SHIFT + r - Grabs starting time.
-* CTRL + SHIFT + t - Grabs end time and calculates duration.
-* CTRL + SHIFT + Y - Adds clip to queue given the current settings and starts processing
+* CTRL + Q - Grabs starting time.
+* CTRL + W - Grabs end time and calculates duration.
+* CTRL + E - Adds clip to queue given the current settings and starts processing

@@ -10,6 +10,6 @@ function queue_create()
 	print("CREATE")
 end
 
-mp.add_key_binding("ctrl+R", "get_start", get_start)
-mp.add_key_binding("ctrl+T", "get_end", get_end)
-mp.add_key_binding("ctrl+Y", "queue_create", queue_create)
+mp.add_key_binding("ctrl+Q", "get_start", get_start)
+mp.add_key_binding("ctrl+W", "get_end", get_end)
+mp.add_key_binding("ctrl+E", "queue_create", queue_create)

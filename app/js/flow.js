@@ -2,6 +2,7 @@ const path = require('path');
 const fs = require('fs');
 const spawn = require('child_process').spawn;
 const {shell} = require('electron');
+const os = require('os');
 var ffmpeg = require('ffmpeg-static');
 var ffpath = ffmpeg.path;
 var filePaths = [];
@@ -630,8 +631,14 @@ function playVid(id) {
 	var tempFilm = findFilm(id);
 	var path = tempFilm.filepath;
 	var scriptPath = __dirname + '/../extraResources/stamps.lua'
-	console.log('Script Path: ' + scriptPath);
-	const mpvPlay = spawn('mpv', ['--osd-fractions', '--script=' + scriptPath, path]);
+	var mpvPath = "";
+	var osPlatform = os.platform;
+	if(osPlatform == "darwin"){
+		mpvPath = "/usr/local/bin/mpv";
+	} else {
+		mpvPath = "/usr/bin/mpv";
+	}
+	const mpvPlay = spawn(mpvPath, ['--osd-fractions', '--script=' + scriptPath, path]);
 	
 	mpvPlay.stderr.on('data', (data) => {
 		getStamp(data.toString(), tempFilm);
