@@ -167,7 +167,7 @@ input[type='radio'] {
 	grid-template-columns: 1fr 1fr;
 	object-fit: cover;
 	text-align: left;
-	grid-gap: 10px;  
+	grid-gap: 10px;
 	margin-bottom: 10px;
 }
 
@@ -318,10 +318,10 @@ input[type='radio'] {
 .outDirBox {
 	width: 95%;
 	margin-top: -5px;
-	display: none;	
+	display: none;
 	overflow: auto;
 	white-space: nowrap;
-	padding: 7px 5px 7px 5px;
+	padding: 10px 10px 20px 10px;
 	color: rgba(251, 250, 244, 1);
 }
 
