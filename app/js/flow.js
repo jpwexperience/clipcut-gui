@@ -2,6 +2,7 @@ const path = require('path');
 const fs = require('fs');
 const spawn = require('child_process').spawn;
 const {shell} = require('electron');
+const {dialog} = require('electron').remote;
 const os = require('os');
 var ffmpeg = require('ffmpeg-static');
 var ffpath = ffmpeg.path;
@@ -635,6 +636,14 @@ function playVid(id) {
 	var osPlatform = os.platform;
 	if(osPlatform == "darwin"){
 		mpvPath = "/usr/local/bin/mpv";
+	} else if (osPlatform == "win32"){
+		mpvPath = dialog.showOpenDialog({
+			properties: ['openFile']
+		}, {
+			filters: [
+				{ name: 'Executables', extensions: ['exe'] } 
+			]
+		});
 	} else {
 		mpvPath = "/usr/bin/mpv";
 	}
