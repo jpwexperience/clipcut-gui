@@ -40,7 +40,6 @@
     "jquery": "^3.4.1",
     "jquery-ui": "^1.12.1",
     "jquery-ui-dist": "^1.12.1",
-    "node-mpv": "^1.4.3",
     "query-string": "^6.8.1",
     "rpmbuild": "0.0.22"
   },
