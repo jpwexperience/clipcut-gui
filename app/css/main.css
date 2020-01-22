@@ -173,7 +173,7 @@ input[type='radio'] {
 
 .outRow {
 	display: grid;
-	grid-template-columns: 150px 50%;
+	grid-template-columns: 150px 250px;
 	object-fit: cover;
 	text-align: left;
 	grid-gap: 20px;
@@ -317,12 +317,16 @@ input[type='radio'] {
 
 .outDirBox {
 	width: 95%;
-	margin-top: -5px;
+	margin-top: -2px;
 	display: none;
 	overflow: auto;
 	white-space: nowrap;
-	padding: 10px 10px 20px 10px;
+	padding: 2px 5px 10px 5px;
 	color: rgba(251, 250, 244, 1);
+}
+
+.outDirBox::-webkit-scrollbar {
+	display: none
 }
 
 .errBox {
