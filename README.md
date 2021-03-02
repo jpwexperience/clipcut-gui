@@ -1,6 +1,6 @@
 # Clip Cut Gui
 
-<img src="https://jpwexperience.com/assets/images/clipcut/clipcut-screenshot-1.6.jpg">
+## Would recommend using [Angel Clip/Cut](https://github.com/jpwexperience/angel-clipcut) over this.
 
 An electron application that allows easier cutting of clips and burning subtitles from movies.
 
@@ -17,8 +17,6 @@ Don't have any error checking on the form as of now so ill formated entries will
 1. Clone repository
 2. run 'npm install' while in repository
 3. run 'npm start'
-
-#### Distributables (may not incorporate latest features): <a href="https://clipcut.jpwexperience.com" target="_blank">clipcut.jpwexperience.com</a>
 
 ### Input Options:
 Clip Start: Timecode (00:00:00.00) or number of seconds of when the clip should start<br />
